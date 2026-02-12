@@ -35,7 +35,7 @@ def create_nexus_file(scan):
     """ open nexus file
 
     :param scan: blissdata scan
-    :type scan:
+    :type scan: :obj:`blissdata.redis_engine.scan.Scan`
     :returns: nexus file object
     :rtype: :obj:`NXSFile`
     """
@@ -49,7 +49,7 @@ def create_nexus_file(scan):
 
     nxsfl = NXSFile(fpath, scan)
     if not fpath.exists():
-        nxsfl.write_file_head()
+        nxsfl.create_file_structure()
     return nxsfl
 
 
@@ -60,9 +60,10 @@ class NXSFile:
         :param fpath:  NeXus path and file name
         :type fpath:  :obj:`pathlib.Path`
         :param scan: blissdata scan
-        :type scan:
-
+        :type scan: :obj:`blissdata.redis_engine.scan.Scan`
         """
-
         self.scan = scan
         self.fpath = fpath
+
+    def create_file_structure():
+        pass
