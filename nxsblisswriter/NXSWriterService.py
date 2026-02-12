@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+#   This file is part of nexdatas - Tango Server for NeXus data writer
+#
+#    Copyright (C) 2026 DESY, Jan Kotanski <jkotan@mail.desy.de>
+#
+#    nexdatas is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    nexdatas is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with nexdatas.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+""" Provides the access to a database with NDTS configuration files """
+
+import time
+
+from blissdata.redis_engine.store import DataStore
+from blissdata.redis_engine.scan import ScanState
+# from blissdata.redis_engine.exceptions import EndOfStream
+from blissdata.redis_engine.exceptions import NoScanAvailable
+
+
+def write_scan(scan):
+    """ write scan data
+    """
+
+    while scan.state < ScanState.PREPARED:
+        time.sleep(0.001)
+        scan.update()
+
+
+class NXSWriterService:
+
+    def __init__(self, redis_url, session, next_scan_timeout):
+        """ constructor
+
+        :param redis_url: blissdata redis url
+        :type redis_url: :obj:`str`
+        :param session: blissdata session name
+        :type session: :obj:`str`
+        :param next_scan_timeout: timeout  between the scans in seconds
+        :type next_scan_timeout: :obj:`int`
+
+        """
+        self.running = False
+        self.next_scan_timeout = next_scan_timeout
+        self.session = session
+        self.datastore = DataStore(redis_url)
+
+    def start(self):
+        """ start writer service
+        """
+        self.running = True
+        timestamp = None
+
+        while self.running:
+            try:
+                timestamp, key = self.datastore.get_next_scan(
+                    since=timestamp, timeout=self.next_scan_timeout
+                )
+            except NoScanAvailable:
+                continue
+            scan = self.datastore.load_scan(key)
+            write_scan(scan)
+
+    def get_status(self):
+        """ get writer service status
+        """
+        status = "is RUNNING" if self.running else "is STOPPED"
+        return "NXSWriter %s" % status
+
+    def stop(self):
+        """ stop writer service
+        """
+        self.running = False
+
+
+def main():
+    """ main function
+    """
+
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Start a Tango server for saving data from blisdata"
+        "in NeXus file"
+    )
+    parser.add_argument(
+        "--redis-url", "-u",
+        type=str,
+        dest="redis_url",
+        default="redis://localhost:6380",
+        help="Blissdata redis url ('redis://localhost:6380' by default)",
+    )
+    parser.add_argument(
+        "--session", "-s",
+        type=str,
+        dest="session",
+        default="",
+        help="Blissdata session name ('' by default)",
+    )
+    parser.add_argument(
+        "--scan-timeout", "-t",
+        type=int,
+        dest="scan_timeout",
+        default=0,
+        help="Scan timeout (0 by default)",
+    )
+
+    args = parser.parse_args()
+    NXSWriterService(args.redis_url, args.session, args.scan_timeout).start()
+
+
+if __name__ == "__main__":
+    main()
