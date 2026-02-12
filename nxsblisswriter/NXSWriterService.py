@@ -26,14 +26,7 @@ from blissdata.redis_engine.scan import ScanState
 # from blissdata.redis_engine.exceptions import EndOfStream
 from blissdata.redis_engine.exceptions import NoScanAvailable
 
-
-def write_scan(scan):
-    """ write scan data
-    """
-
-    while scan.state < ScanState.PREPARED:
-        time.sleep(0.001)
-        scan.update()
+from .NXSFile import create_nexus_file
 
 
 class NXSWriterService:
@@ -68,7 +61,7 @@ class NXSWriterService:
             except NoScanAvailable:
                 continue
             scan = self.datastore.load_scan(key)
-            write_scan(scan)
+            self.write_scan(scan)
 
     def get_status(self):
         """ get writer service status
@@ -80,6 +73,23 @@ class NXSWriterService:
         """ stop writer service
         """
         self.running = False
+
+    def write_scan(self, scan):
+        """ write scan data
+
+        :param scan: blissdata scan
+        :type scan:
+        """
+        while scan.state < ScanState.PREPARED:
+            time.sleep(0.001)
+            scan.update()
+        print("SCAN", scan.number, type(scan))
+
+        nxsfl = create_nexus_file(scan)
+        if nxsfl is None:
+            return
+        else:
+            nxsfl.write_scan_head()
 
 
 def main():
