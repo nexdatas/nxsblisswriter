@@ -7,6 +7,13 @@ import json
 
 from sardana_blissdata.utils.redis_utils import get_data_store
 
+try:
+    _npver = np.version.version.split(".")
+    NPMAJOR = int(_npver[0])
+except Exception:
+    NPMAJOR = 1
+
+
 pTh = {
     "long": h5cpp.datatype.Integer,
     "str": h5cpp.datatype.kVariableString,
@@ -66,6 +73,7 @@ def create_field(grp, name, dtype, value):
     field.write(value)
     return field
 
+
 attrdesc = {
     "nexus_type": "type",
     "unit": "units",
@@ -77,7 +85,9 @@ attrdesc = {
     "strategy": "nexdatas_strategy",
 }
 
-noattrs = {"name", "label", "dtype" , "value", "nexus_path"}
+
+noattrs = {"name", "label", "dtype", "value", "nexus_path"}
+
 
 def first(array):
     """  get first element if the only
@@ -106,8 +116,8 @@ def write_attr(am, name, dtype, value, item=None):
     try:
         at = am[name]
         # print("TYPE",name, value, at.dataspace.type)
-    except Exception as ae:
-        # print(ae)
+    except Exception:  # as ae:
+        #  print(ae)
         at = None
     if at is None:
         try:
@@ -120,7 +130,7 @@ def write_attr(am, name, dtype, value, item=None):
                 at = am.create(name, pTh[str(dtype)])
             else:
                 at = am.create(name, pTh[str(dtype)], vshape)
-                print("VHASPE", vshape, name , value)
+                print("VHASPE", vshape, name, value)
         except Exception as e:
             print("CREATE ATT", name, dtype, pTh[dtype])
             print("WWAA", am, name, dtype, value, type(value), item)
@@ -133,7 +143,8 @@ def write_attr(am, name, dtype, value, item=None):
                     rvalue = first(rvalue)
                 if str(rvalue) != str(value):
                     at.write(value)
-                    # print("WRITE", am, name, dtype, value, type(value), rvalue)
+                    # print("WRITE", am, name, dtype, value,
+                    #       type(value), rvalue)
                     # print("DIFF", name, str(value), str(rvalue))
                 else:
                     pass
@@ -145,7 +156,8 @@ def write_attr(am, name, dtype, value, item=None):
                 if hasattr(at.dataspace, "current_dimensions"):
                     shape = at.dataspace.current_dimensions
                 if shape:
-                    if not isinstance(value, list) and not hasattr(value, "shape"):
+                    if not isinstance(value, list) and \
+                            not hasattr(value, "shape"):
                         value = json.loads(value)
                 at.write(value)
     except Exception as e:
@@ -227,8 +239,6 @@ def write_snapshot_item(root, item):
             dtp = str(type(avl).__name__)
             nanm = attrdesc.get(anm, anm)
             write_attr(am, nanm, dtp, avl, item)
-
-
 
 
 def main():
