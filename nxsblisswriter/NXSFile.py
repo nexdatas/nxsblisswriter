@@ -48,6 +48,7 @@ def create_nexus_file(scan):
         fdir.mkdir(parents=True)
 
     nxsfl = NXSFile(fpath, scan)
+    # ?? append mode
     if not fpath.exists():
         nxsfl.create_file_structure()
     return nxsfl
@@ -66,4 +67,13 @@ class NXSFile:
         self.fpath = fpath
 
     def create_file_structure():
+        pass
+
+    def write_init_snapshot():
+        pass
+
+    def write_scan_points():
+        pass
+
+    def write_final_snapshot():
         pass

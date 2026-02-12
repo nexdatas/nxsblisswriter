@@ -19,7 +19,7 @@
 
 """ Provides the access to a database with NDTS configuration files """
 
-import time
+# import time
 
 from blissdata.redis_engine.store import DataStore
 from blissdata.redis_engine.scan import ScanState
@@ -81,15 +81,24 @@ class NXSWriterService:
         :type scan:
         """
         while scan.state < ScanState.PREPARED:
-            time.sleep(0.001)
             scan.update()
-        print("SCAN", scan.number, type(scan))
+
+        print("SCAN", scan.number)
 
         nxsfl = create_nexus_file(scan)
         if nxsfl is None:
             return
         else:
-            nxsfl.write_scan_head()
+            nxsfl.write_init_snapshot()
+
+        while scan.state < ScanState.STOPPED:
+            scan.update(block=False)
+            nxsfl.write_scan_points()
+
+        while scan.state < ScanState.CLOSED:
+            scan.update()
+
+        nxsfl.write_final_snapshot()
 
 
 def main():
