@@ -51,7 +51,6 @@ From sources
 Download the latest version of NeXuS Configuration Server from
 
 |    https://github.com/nexdatas/nxsblisswriter/
-|    https://github.com/nexdatas/nxsblisswriter-db/
 
 Extract the sources and run
 
