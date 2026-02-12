@@ -109,8 +109,8 @@ Moreover it is also good to install
    $ pip install pytango
    $ pip install nxstools
 
-Setting NeXus Configuration Server
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting NeXus BlissData Writer Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To set up  NeXus Blissdata WriterServer with the default configuration run
 
