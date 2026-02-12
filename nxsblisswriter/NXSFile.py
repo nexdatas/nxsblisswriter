@@ -63,17 +63,17 @@ class NXSFile:
         :param scan: blissdata scan
         :type scan: :obj:`blissdata.redis_engine.scan.Scan`
         """
-        self.scan = scan
-        self.fpath = fpath
+        self.__scan = scan
+        self.__fpath = fpath
 
-    def create_file_structure():
+    def create_file_structure(self):
         pass
 
-    def write_init_snapshot():
+    def write_init_snapshot(self):
         pass
 
-    def write_scan_points():
+    def write_scan_points(self):
         pass
 
-    def write_final_snapshot():
+    def write_final_snapshot(self):
         pass
