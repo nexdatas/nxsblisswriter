@@ -249,7 +249,7 @@ def main():
     si = scan.info
     filename = si["filename"]
     snapshot = si["snapshot"]
-    xmlc = snapshot["nxsdatawriter_xmlsettings"][0]["value"]
+    xmlc = snapshot["nxsdatawriter_xmlsettings"]["value"]
     # with open("xmlc.xml", 'r') as f:
     #     xmlc = f.read()
     xmlc1 = xmlc.replace('"NX_DATE_TIME"', '"NX_CHAR"')

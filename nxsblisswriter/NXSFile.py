@@ -19,7 +19,8 @@
 
 """ Provides the access to a database with NDTS configuration files """
 
-# import time
+import functools
+import time
 import pathlib
 from pninexus import nexus, h5cpp
 import xml.etree.ElementTree as et
@@ -30,7 +31,7 @@ import json
 
 # from blissdata.redis_engine.store import DataStore
 # from blissdata.redis_engine.scan import ScanState
-# from blissdata.redis_engine.exceptions import EndOfStream
+from blissdata.redis_engine.exceptions import EndOfStream
 # from blissdata.redis_engine.exceptions import NoScanAvailable
 
 
@@ -43,7 +44,7 @@ except Exception:
     NPMAJOR = 1
 
 
-pTh = {
+PTH = {
     "long": h5cpp.datatype.Integer,
     "str": h5cpp.datatype.kVariableString,
     "unicode": h5cpp.datatype.kVariableString,
@@ -63,6 +64,20 @@ pTh = {
     "float32": h5cpp.datatype.kFloat32,
     "string": h5cpp.datatype.kVariableString,
 }
+
+ATTRDESC = {
+    "nexus_type": "type",
+    "unit": "units",
+    "depends_on": "depends_on",
+    "trans_type": "transformation_type",
+    "trans_vector": "vector",
+    "trans_offset": "offset",
+    "source": "nexdatas_source",
+    "strategy": "nexdatas_strategy",
+}
+
+
+NOATTRS = {"name", "label", "dtype", "value", "nexus_path", "shape", "stream"}
 
 
 def create_field(grp, name, dtype, value):
@@ -87,7 +102,7 @@ def create_field(grp, name, dtype, value):
     elif dtype in ["str", "unicode", "string"]:
         dataspace = h5cpp.dataspace.Scalar()
         field = h5cpp.node.Dataset(
-            grp, h5cpp.Path(name), pTh[dtype], dataspace,
+            grp, h5cpp.Path(name), PTH[dtype], dataspace,
             dcpl=dcpl)
         field.write(value)
         return field
@@ -98,24 +113,9 @@ def create_field(grp, name, dtype, value):
     dcpl.layout = h5cpp.property.DatasetLayout.CHUNKED
     dcpl.chunk = tuple(chunk)
     field = h5cpp.node.Dataset(
-        grp, h5cpp.Path(name), pTh[dtype], dataspace, dcpl=dcpl)
+        grp, h5cpp.Path(name), PTH[dtype], dataspace, dcpl=dcpl)
     field.write(value)
     return field
-
-
-attrdesc = {
-    "nexus_type": "type",
-    "unit": "units",
-    "depends_on": "depends_on",
-    "trans_type": "transformation_type",
-    "trans_vector": "vector",
-    "trans_offset": "offset",
-    "source": "nexdatas_source",
-    "strategy": "nexdatas_strategy",
-}
-
-
-noattrs = {"name", "label", "dtype", "value", "nexus_path"}
 
 
 def first(array):
@@ -142,11 +142,11 @@ def first(array):
 
 
 def write_attr(am, name, dtype, value, item=None):
+
     try:
         at = am[name]
         # print("TYPE",name, value, at.dataspace.type)
-    except Exception:  # as ae:
-        #  print(ae)
+    except Exception:
         at = None
     if at is None:
         try:
@@ -156,13 +156,12 @@ def write_attr(am, name, dtype, value, item=None):
             elif hasattr(value, "shape"):
                 vshape = value.shape
             if not vshape:
-                at = am.create(name, pTh[str(dtype)])
+                at = am.create(name, PTH[str(dtype)])
             else:
-                at = am.create(name, pTh[str(dtype)], vshape)
-                print("VHASPE", vshape, name, value)
+                at = am.create(name, PTH[str(dtype)], vshape)
         except Exception as e:
-            print("CREATE ATT", name, dtype, pTh[dtype])
-            print("WWAA", am, name, dtype, value, type(value), item)
+            print("CREATE ATT", name, dtype, PTH[dtype])
+            print("WWAA", name, name, dtype, value, type(value), item)
             print(str(e))
     try:
         if at is not None:
@@ -179,7 +178,7 @@ def write_attr(am, name, dtype, value, item=None):
                     pass
                     # print("THE SAME", name, value)
             except Exception as e:
-                print(str(e))
+                print("ERROR", str(e), am, name, dtype, value, item=None)
                 # print("at", at.read(), dir(at))
                 shape = None
                 if hasattr(at.dataspace, "current_dimensions"):
@@ -191,7 +190,7 @@ def write_attr(am, name, dtype, value, item=None):
                 at.write(value)
     except Exception as e:
         # print("READ", at.read())
-        print(str(e))
+        print("ERROR2", str(e), am, name, dtype, value, item=None)
         # print("WW", am, name, dtype, value, item)
         # print(at, dir(at))
 
@@ -232,7 +231,6 @@ def write_snapshot_item(root, item):
                     group = root.get_group(h5path)
                     am = group.attributes
                 write_attr(am, attr, dtype, value)
-
         except Exception as e:
             # print(ds, item)
             if str(e).startswith("No node ["):
@@ -255,19 +253,30 @@ def write_snapshot_item(root, item):
                 name = lnxpath[-1]
                 if isinstance(value, list):
                     value = np.array(value, dtype=dtype)
-                print("CREATE %s (%s)" % (nxpath, dtype))
+                # print("CREATE %s (%s)" % (nxpath, dtype))
                 dataset = create_field(grp, name, dtype, value)
             else:
-                print("ERRPOR", str(e), type(e))
+                print("ERROR", str(e), type(e))
                 raise
     if dataset is not None:
-        attrs = set(item.keys()) - noattrs
+        attrs = set(item.keys()) - NOATTRS
         am = dataset.attributes
         for anm in attrs:
             avl = item[anm]
-            dtp = str(type(avl).__name__)
-            nanm = attrdesc.get(anm, anm)
-            write_attr(am, nanm, dtp, avl, item)
+            if isinstance(avl, list):
+                av = avl[0]
+                while isinstance(av, list) and len(av):
+                    av = av[0]
+                dtp = str(type(av).__name__)
+            elif hasattr(avl, "dtype"):
+                dtp = str(dtype.__name__)
+            else:
+                dtp = str(type(avl).__name__)
+            nanm = ATTRDESC.get(anm, anm)
+            try:
+                write_attr(am, nanm, dtp, avl, item)
+            except Exception as e:
+                print("WRII", am, nanm, dtp, avl, item, str(e))
 
 
 def create_nexus_file(scan):
@@ -294,7 +303,8 @@ def create_nexus_file(scan):
 
 
 class NXSFile:
-    def __init__(self, scan, fpath=None):
+
+    def __init__(self, scan, fpath=None, max_write_interval=1):
         """ constructor
 
         :param scan: blissdata scan
@@ -302,6 +312,18 @@ class NXSFile:
         """
         self.__scan = scan
         self.__mfile = None
+        self.__cursors = {}
+        self.__last_write_time = 0
+        self.__max_write_interval = max_write_interval
+
+    @functools.cached_property
+    def channels(self):
+        return tuple(ch for ch in self.__scan.info["datadesc"].values())
+
+    @functools.cached_property
+    def labels(self):
+        labels = (ch["label"] for ch in self.channels)
+        return tuple(label.replace(" ", "_") for label in labels)
 
     def create_file_structure(self):
         """ create nexus structure
@@ -313,7 +335,7 @@ class NXSFile:
             snapshot = si["snapshot"]
         xmls = None
         try:
-            xmlc = snapshot["nxsdatawriter_xmlsettings"][0]["value"]
+            xmlc = snapshot["nxsdatawriter_xmlsettings"]["value"]
         except Exception as e:
             print(str(e))
             xmlc = None
@@ -346,32 +368,59 @@ class NXSFile:
         if "snapshot" in si:
             snapshot = si["snapshot"]
         for ds, items in snapshot.items():
+            if not isinstance(items, list):
+                items = [items]
             for item in items:
                 strategy = None
                 if "strategy" in item:
                     strategy = item["strategy"]
                 if not strategy or strategy in ["INIT"]:
                     try:
-                        print("WRITE", ds, strategy)
+                        # print("WRITE", ds, strategy)
                         write_snapshot_item(root, item)
                     except Exception as e:
-                        print("WWW", str(e))
+                        print("Error: ", ds, strategy, item, str(e))
                         break
             else:
                 continue
             break
 
+    def prepareCursors(self):
+        """ prepare cursors
+        """
+        self.__cursors = {}
+        for key, stream in self.__scan.streams.items():
+            self.__cursors[key] = stream.cursor()
+
     def write_scan_points(self):
         """ write step data
         """
-        si = self.__scan.info
-        scsts = self.__scan.streams
-        for snm in scsts.keys():
-            item = None
-            if snm in si["datadesc"]:
-                item = si["datadesc"][snm]
-                print(type(item[0]))
-        # print(si["datadesc"])
+        now = time.monotonic()
+        if (now - self.__last_write_time) < self.__max_write_interval:
+            return
+
+        values = []
+
+        for ch in self.channels:
+            if "stream" in ch and ch["stream"] not in ["stream"]:
+                print("SKIP", ch["label"])
+                continue
+            try:
+                val = self.__cursors[ch["label"]].read()
+            except EndOfStream:
+                print("END of STREAM")
+                return
+            try:
+                values.append(val.get_data())
+            except Exception as e:
+                print(ch)
+                print(str(e))
+                values.append(None)
+
+        # npoints = len(values[0])
+
+        # for i in range(npoints):
+        self.__last_write_time = now
 
     def write_final_snapshot(self):
         """ write final data
@@ -382,19 +431,26 @@ class NXSFile:
         if "snapshot" in si:
             snapshot = si["snapshot"]
         for ds, items in snapshot.items():
+            if not isinstance(items, list):
+                items = [items]
             for item in items:
                 strategy = None
                 if "strategy" in item:
                     strategy = item["strategy"]
                 if strategy in ["FINAL"]:
                     try:
-                        print("WRITE", ds, strategy)
+                        # print("WRITE", ds, strategy)
                         write_snapshot_item(root, item)
                     except Exception as e:
-                        print("WWW", str(e))
+                        print("Error: ", ds, strategy, item, str(e))
                         break
             else:
                 continue
             break
+
+    def close(self):
+        """ close file
+        """
+        root = self.__mfile.root()
         root.close()
         self.__mfile.close()

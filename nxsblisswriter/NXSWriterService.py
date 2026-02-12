@@ -96,6 +96,8 @@ class NXSWriterService:
         print("SCAN INIT", scan.number)
         nxsfl.write_init_snapshot()
 
+        nxsfl.prepareCursors()
+
         while scan.state < ScanState.STOPPED:
             scan.update(block=False)
             print("SCAN POINT", scan.number)
@@ -106,6 +108,7 @@ class NXSWriterService:
 
         print("SCAN FINAL", scan.number)
         nxsfl.write_final_snapshot()
+        nxsfl.close()
 
 
 def main():
