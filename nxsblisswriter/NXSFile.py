@@ -80,7 +80,7 @@ ATTRDESC = {
 NOATTRS = {"name", "label", "dtype", "value", "nexus_path", "shape", "stream"}
 
 
-def create_field(grp, name, dtype, value):
+def create_field(grp, name, dtype, value=None, shape=None, chunk=None):
     """ create field
     :param n: group name
     :type n: :obj:`str`
@@ -95,27 +95,73 @@ def create_field(grp, name, dtype, value):
     :returns: file tree field
     :rtype: :class:`H5CppField`
     """
+    # print("CREATE", name, dtype, value, shape, chunk)
     dcpl = h5cpp.property.DatasetCreationList()
-    shape = None
-    if hasattr(value, "shape"):
+    if shape is None and hasattr(value, "shape"):
         shape = value.shape
     elif dtype in ["str", "unicode", "string"]:
         dataspace = h5cpp.dataspace.Scalar()
         field = h5cpp.node.Dataset(
             grp, h5cpp.Path(name), PTH[dtype], dataspace,
             dcpl=dcpl)
-        field.write(value)
+        if value is not None:
+            field.write(value)
         return field
     shape = shape or [1]
     dataspace = h5cpp.dataspace.Simple(
         tuple(shape), tuple([h5cpp.dataspace.UNLIMITED] * len(shape)))
-    chunk = [(dm if dm != 0 else 1) for dm in shape]
+    if chunk is None:
+        chunk = [(dm if dm != 0 else 1) for dm in shape]
     dcpl.layout = h5cpp.property.DatasetLayout.CHUNKED
     dcpl.chunk = tuple(chunk)
     field = h5cpp.node.Dataset(
         grp, h5cpp.Path(name), PTH[dtype], dataspace, dcpl=dcpl)
-    field.write(value)
+    if value is not None:
+        field.write(value)
     return field
+
+
+def create_groupfield(root, lnxpath, dtype,
+                      value=None, shape=None, chunk=None):
+    """ create field
+
+    :param root: root object
+    :type root: :class:`nxgroup`
+    :param lnxpath: nexus path list
+    :type lnxpath: :obj:`list` <:obj:`str`>
+    :param dtype: nexus field type
+    :type dtype: :obj:`str`
+    :param value: field value
+    :type value: :obj:`any`
+    :param shape: shape
+    :type shape: :obj:`list` < :obj:`int` >
+    :param chunk: chunk
+    :type chunk: :obj:`list` < :obj:`int` >
+    :returns: nexus field
+    :rtype: :class:`nxfield`
+    """
+    grp = root
+    for gr in lnxpath[:-1]:
+        gn = gr
+        gt = None
+        if ":" in gr:
+            gn, gt = gr.split(":")
+
+        if grp.has_group(gn):
+            grp = grp.get_group(gn)
+        else:
+            grp = h5cpp.node.Group(grp, gn)
+            if gt is not None:
+                grp.attributes.create(
+                    "NX_class",
+                    h5cpp.datatype.kVariableString).write(gt)
+        # print(gn)
+    name = lnxpath[-1]
+    if isinstance(value, list):
+        value = np.array(value, dtype=dtype)
+    # print("CREATE %s (%s)" % (nxpath, dtype))
+    dataset = create_field(grp, name, dtype, value, shape, chunk)
+    return dataset
 
 
 def first(array):
@@ -206,9 +252,9 @@ def write_snapshot_item(root, item):
         attr = None
         if "@" in nxpath:
             nxpath, attr = nxpath.split("@", 1)
+        lnxpath = nxpath.split("/")
+        h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
         try:
-            lnxpath = nxpath.split("/")
-            h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
             if not attr:
                 dataset = root.get_dataset(h5path)
                 if dataset.dataspace.type != \
@@ -234,27 +280,8 @@ def write_snapshot_item(root, item):
         except Exception as e:
             # print(ds, item)
             if str(e).startswith("No node ["):
-                grp = root
-                for gr in lnxpath[:-1]:
-                    gn = gr
-                    gt = None
-                    if ":" in gr:
-                        gn, gt = gr.split(":")
-
-                    if grp.has_group(gn):
-                        grp = grp.get_group(gn)
-                    else:
-                        grp = h5cpp.node.Group(grp, gn)
-                        if gt is not None:
-                            grp.attributes.create(
-                                "NX_class",
-                                h5cpp.datatype.kVariableString).write(gt)
-                    # print(gn)
-                name = lnxpath[-1]
-                if isinstance(value, list):
-                    value = np.array(value, dtype=dtype)
-                # print("CREATE %s (%s)" % (nxpath, dtype))
-                dataset = create_field(grp, name, dtype, value)
+                dataset = create_groupfield(
+                    root, lnxpath, dtype, value)
             else:
                 print("ERROR", str(e), type(e))
                 raise
@@ -313,6 +340,7 @@ class NXSFile:
         self.__scan = scan
         self.__mfile = None
         self.__cursors = {}
+        self.__nxfields = {}
         self.__last_write_time = 0
         self.__max_write_interval = max_write_interval
 
@@ -385,12 +413,41 @@ class NXSFile:
                 continue
             break
 
-    def prepareCursors(self):
+    def prepareChannels(self):
         """ prepare cursors
         """
         self.__cursors = {}
-        for key, stream in self.__scan.streams.items():
-            self.__cursors[key] = stream.cursor()
+        self.__nxfields = {}
+        #         for key, stream in self.__scan.streams.items():
+        # -           self.__cursors[key] = stream.cursor()
+        for ch in self.channels:
+            key = ch["label"]
+            # print("CH", key, list(self.__scan.streams.keys()))
+            if key in list(self.__scan.streams.keys()):
+                stream = self.__scan.streams[key]
+                self.__cursors[key] = stream.cursor()
+                shape = [0] + list(stream.shape)
+                chunk = [1] + list(stream.shape)
+                nxpath = ch.get('nexus_path', None)
+                dtype = str(stream.dtype)
+                if hasattr(dtype, "__name__"):
+                    dtype = str(dtype.__name__)
+                if dtype == "string":
+                    dtype = "str"
+                lnxpath = nxpath.split("/")
+                h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
+                root = self.__mfile.root()
+                try:
+                    self.__nxfields[key] = root.get_dataset(h5path)
+                except Exception as e:
+                    if str(e).startswith("No node ["):
+                        # print("S", key, shape, chunk, stream.dtype, ch)
+                        self.__nxfields[key] = create_groupfield(
+                            root, lnxpath, dtype, value=None,
+                            shape=shape, chunk=chunk)
+                    else:
+                        print("ERROR", str(e), type(e))
+                        raise
 
     def write_scan_points(self):
         """ write step data
@@ -398,8 +455,6 @@ class NXSFile:
         now = time.monotonic()
         if (now - self.__last_write_time) < self.__max_write_interval:
             return
-
-        values = []
 
         for ch in self.channels:
             if "stream" in ch and ch["stream"] not in ["stream"]:
@@ -411,12 +466,29 @@ class NXSFile:
                 print("END of STREAM")
                 return
             try:
-                values.append(val.get_data())
+                key = ch["label"]
+                values = val.get_data()
+                # print("CHANNEL", ch["label"], ch["shape"], values)
+                npoints = len(values)
+                if npoints:
+                    oldshape = \
+                        self.__nxfields[key].dataspace.current_dimensions
+                    rank = len(oldshape)
+                    if rank:
+                        offset = [0] * rank
+                        block = list(oldshape)
+                        offset[0] = oldshape[0]
+                        block[0] = npoints
+                        selection = h5cpp.dataspace.Hyperslab(
+                            offset=offset, block=block)
+                        self.__nxfields[key].extent(0, npoints)
+                        # print(self.__nxfields[key].dataspace.current_dimensions)
+                        # print(offset, block)
+                        self.__nxfields[key].write(values, selection)
             except Exception as e:
                 print(ch)
+                print(key, values)
                 print(str(e))
-                values.append(None)
-
         # npoints = len(values[0])
 
         # for i in range(npoints):

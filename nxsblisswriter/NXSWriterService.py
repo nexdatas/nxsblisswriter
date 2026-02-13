@@ -96,7 +96,7 @@ class NXSWriterService:
         print("SCAN INIT", scan.number)
         nxsfl.write_init_snapshot()
 
-        nxsfl.prepareCursors()
+        nxsfl.prepareChannels()
 
         while scan.state < ScanState.STOPPED:
             scan.update(block=False)
