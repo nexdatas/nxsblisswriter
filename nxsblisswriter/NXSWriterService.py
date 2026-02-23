@@ -19,21 +19,14 @@
 
 """ Provides the access to a database with NDTS configuration files """
 
-import time
+# import time
 
 from blissdata.redis_engine.store import DataStore
 from blissdata.redis_engine.scan import ScanState
 # from blissdata.redis_engine.exceptions import EndOfStream
 from blissdata.redis_engine.exceptions import NoScanAvailable
 
-
-def write_scan(scan):
-    """ write scan data
-    """
-
-    while scan.state < ScanState.PREPARED:
-        time.sleep(0.001)
-        scan.update()
+from .NXSFile import create_nexus_file
 
 
 class NXSWriterService:
@@ -49,37 +42,73 @@ class NXSWriterService:
         :type next_scan_timeout: :obj:`int`
 
         """
-        self.running = False
-        self.next_scan_timeout = next_scan_timeout
-        self.session = session
-        self.datastore = DataStore(redis_url)
+        #: (:obj:`bool`) service running flag
+        self.__running = False
+        #: (:obj:`int`) scan timeout in seconds
+        self.__next_scan_timeout = next_scan_timeout
+        #: (:obj:`str`) session name
+        self.__session = session
+        #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
+        self.__datastore = DataStore(redis_url)
 
     def start(self):
         """ start writer service
         """
-        self.running = True
+        self.__running = True
         timestamp = None
 
-        while self.running:
+        while self.__running:
             try:
-                timestamp, key = self.datastore.get_next_scan(
-                    since=timestamp, timeout=self.next_scan_timeout
+                timestamp, key = self.__datastore.get_next_scan(
+                    since=timestamp, timeout=self.__next_scan_timeout
                 )
             except NoScanAvailable:
                 continue
-            scan = self.datastore.load_scan(key)
-            write_scan(scan)
+            scan = self.__datastore.load_scan(key)
+            if not self.__session or scan.session == self.__session:
+                self.write_scan(scan)
 
     def get_status(self):
         """ get writer service status
         """
-        status = "is RUNNING" if self.running else "is STOPPED"
+        status = "is RUNNING" if self.__running else "is STOPPED"
         return "NXSWriter %s" % status
 
     def stop(self):
         """ stop writer service
         """
-        self.running = False
+        self.__running = False
+
+    def write_scan(self, scan):
+        """ write scan data
+
+        :param scan: blissdata scan
+        :type scan:
+        """
+        while scan.state < ScanState.PREPARED:
+            scan.update()
+        print("SCAN", scan.number)
+
+        nxsfl = create_nexus_file(scan)
+        if nxsfl is None:
+            return
+
+        print("SCAN INIT", scan.number)
+        nxsfl.write_init_snapshot()
+
+        nxsfl.prepareChannels()
+
+        while scan.state < ScanState.STOPPED:
+            scan.update(block=False)
+            print("SCAN POINT", scan.number)
+            nxsfl.write_scan_points()
+
+        while scan.state < ScanState.CLOSED:
+            scan.update()
+
+        print("SCAN FINAL", scan.number)
+        nxsfl.write_final_snapshot()
+        nxsfl.close()
 
 
 def main():

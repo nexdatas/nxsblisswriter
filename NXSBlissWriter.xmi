@@ -8,7 +8,7 @@
     <deviceProperties name="RedisUrl" description="Dlissdata redis url">
       <type xsi:type="pogoDsl:StringType"/>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <DefaultPropValue>redis://localhost:6379</DefaultPropValue>
+      <DefaultPropValue>redis://localhost:6380</DefaultPropValue>
     </deviceProperties>
     <deviceProperties name="Session" description="session to be recorder">
       <type xsi:type="pogoDsl:StringType"/>

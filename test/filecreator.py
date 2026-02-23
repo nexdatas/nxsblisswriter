@@ -1,5 +1,6 @@
 from pninexus import nexus, h5cpp
 
+
 def main():
     with open("xmlc.xml", 'r') as f:
         xmlc = f.read()
@@ -11,6 +12,7 @@ def main():
     nexus.create_from_string(root, xmlc2)
     root.close()
     mfile.close()
+
 
 if __name__ == "__main__":
     main()
