@@ -43,6 +43,9 @@ class NXSBlissWriter(Device):
         NextScanTimeout
             - timeout for next scan writing
             - Type:'int'
+        DefaultNeXusPath
+            - default NeXus path
+            - Type:'str'
     """
 
     # -----------------
@@ -66,6 +69,13 @@ class NXSBlissWriter(Device):
         doc="timeout for next scan writing"
     )
 
+    DefaultNeXusPath = device_property(
+        dtype='str',
+        default_value="/scan$var.serialno:NXentry/"
+        "instrument:NXinstrument/collection",
+        doc="default NeXus path"
+    )
+
     # ---------------
     # General methods
     # ---------------
@@ -75,7 +85,8 @@ class NXSBlissWriter(Device):
         Device.init_device(self)
         self.info_stream("Initializing device...")
         self.nxs_writer_service = NWS(
-            self.RedisUrl, self.Session, self.NextScanTimeout)
+            self.RedisUrl, self.Session, self.NextScanTimeout,
+            self.DefaultNeXusPath)
         self.Start()
 
     def dev_status(self):

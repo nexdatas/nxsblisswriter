@@ -31,7 +31,9 @@ from .NXSFile import create_nexus_file
 
 class NXSWriterService:
 
-    def __init__(self, redis_url, session, next_scan_timeout):
+    def __init__(self, redis_url, session, next_scan_timeout,
+                 default_nexus_path="/scan$var.serialno:NXentry/"
+                 "instrument:NXinstrument/collection"):
         """ constructor
 
         :param redis_url: blissdata redis url
