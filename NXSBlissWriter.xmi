@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <pogoDsl:PogoSystem xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pogoDsl="http://tango.org/pogo/PogoDsl">
   <classes name="NXSBlissWriter" pogoRevision="9.9">
-    <description description="NeXus Bliss Writer stores (meta)data from blissdata provided by NXSDataWriter" title="NeXus Bliss Writer" sourcePath="/home/jkotan/ndts/nexdatas.nxsblisswriter" language="PythonHL" filestogenerate="XMI   file,Code files,Sphinx,html Pages" license="GPL" copyright="" hasMandatoryProperty="false" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false" descriptionHtmlExists="false">
+    <description description="NeXus Bliss Writer stores (meta)data from blissdata provided by NXSDataWriter" title="NeXus Bliss Writer" sourcePath="/home/jkotan/ndts/nexdatas.nxsblisswriter" language="PythonHL" filestogenerate="XMI   file,Code files,Protected Regions,html Pages" license="GPL" copyright="" hasMandatoryProperty="false" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false" descriptionHtmlExists="false">
       <inheritances classname="Device_Impl" sourcePath=""/>
       <identification contact="at desy.de - jan.kotanski" author="jan.kotanski" emailDomain="desy.de" classFamily="Acquisition" siteSpecific="" platform="All Platforms" bus="Not Applicable" manufacturer="" reference=""/>
     </description>
@@ -18,6 +18,11 @@
       <type xsi:type="pogoDsl:IntType"/>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
       <DefaultPropValue>2</DefaultPropValue>
+    </deviceProperties>
+    <deviceProperties name="DefaultNeXusPath" description="default NeXus path">
+      <type xsi:type="pogoDsl:StringType"/>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+      <DefaultPropValue>/scan$var.serialno:NXentry/instrument:NXinstrument/collection</DefaultPropValue>
     </deviceProperties>
     <commands name="State" description="This command gets the device state (stored in its device_state data member) and returns it to the caller." execMethod="dev_state" displayLevel="OPERATOR" polledPeriod="0">
       <argin description="none">
