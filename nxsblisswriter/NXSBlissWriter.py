@@ -111,3 +111,7 @@ class NXSBlissWriter(Device):
         self.nxs_writer_service.stop()
         self.thread.join()
         self.set_state(DevState.OFF)
+
+    def delete_device(self):
+        """Destructs the attributes and properties of the NXSBlissWriter."""
+        self.Stop()
