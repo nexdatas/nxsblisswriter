@@ -212,10 +212,24 @@ def write_attr(am, name, dtype, value, item=None):
     try:
         if at is not None:
             try:
-                rvalue = at.read()
+                try:
+                    rvalue = at.read()
+                except Exception:
+                    rvalue = None
+                ashape = None
+                vshape = None
+                if isinstance(value, list):
+                    vshape = np.array(value).shape
+                elif hasattr(value, "shape"):
+                    vshape = value.shape
                 if at.dataspace.type == h5cpp.dataspace.Type.SCALAR:
                     rvalue = first(rvalue)
+                else:
+                    ashape = at.dataspace.current_dimensions
                 if str(rvalue) != str(value):
+                    if ashape != vshape:
+                        am.remove(name)
+                        at = am.create(name, PTH[str(dtype)], vshape)
                     at.write(value)
                     # print("WRITE", am, name, dtype, value,
                     #       type(value), rvalue)
@@ -224,7 +238,7 @@ def write_attr(am, name, dtype, value, item=None):
                     pass
                     # print("THE SAME", name, value)
             except Exception as e:
-                print("ERROR", str(e), am, name, dtype, value, item=None)
+                print("ERROR", str(e), am, name, dtype, value, item)
                 # print("at", at.read(), dir(at))
                 shape = None
                 if hasattr(at.dataspace, "current_dimensions"):
@@ -236,7 +250,7 @@ def write_attr(am, name, dtype, value, item=None):
                 at.write(value)
     except Exception as e:
         # print("READ", at.read())
-        print("ERROR2", str(e), am, name, dtype, value, item=None)
+        print("ERROR2", str(e), am, name, dtype, value, item)
         # print("WW", am, name, dtype, value, item)
         # print(at, dir(at))
 
@@ -278,7 +292,7 @@ def write_snapshot_item(root, item):
                     am = group.attributes
                 write_attr(am, attr, dtype, value)
         except Exception as e:
-            # print(ds, item)
+            # print(nxpath, str(e))
             if str(e).startswith("No node ["):
                 dataset = create_groupfield(
                     root, lnxpath, dtype, value)
