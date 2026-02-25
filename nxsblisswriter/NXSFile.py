@@ -404,7 +404,7 @@ class NXSFile:
         """ create nexus structure
         """
         si = self.__scan.info
-        filename = str(self.__fpath.absolute())   #  si["filename"]
+        filename = str(self.__fpath.absolute())
         snapshot = {}
         if "snapshot" in si:
             snapshot = si["snapshot"]
