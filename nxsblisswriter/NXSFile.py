@@ -339,7 +339,7 @@ def create_nexus_file(scan,
     """
     fpath = pathlib.Path(scan.info["filename"])
     if fpath.suffix not in ALLOWED_NXS_SURFIXES:
-        return None
+        fpath = fpath.with_suffix(".nxs")
 
     fdir = fpath.parent
     if not fdir.is_dir():
@@ -357,7 +357,7 @@ def create_nexus_file(scan,
         if entryname in snapshot.keys() and "value" in snapshot["entryname"]:
             entryname = snapshot["entryname"]["value"]
 
-    nxsfl = NXSFile(scan, default_nexus_path.format(
+    nxsfl = NXSFile(scan, fpath, default_nexus_path.format(
         number=number, serialno=serialno, entryname=entryname))
     # ?? append mode
     if not fpath.exists():
@@ -367,7 +367,7 @@ def create_nexus_file(scan,
 
 class NXSFile:
 
-    def __init__(self, scan,
+    def __init__(self, scan, fpath,
                  default_nexus_path="/scan{serialno}:NXentry/"
                  "instrument:NXinstrument/collection",
                  max_write_interval=1):
@@ -375,6 +375,8 @@ class NXSFile:
 
         :param scan: blissdata scan
         :type scan: :obj:`blissdata.redis_engine.scan.Scan`
+        :param fpath: nexus file path
+        :type fpath: :obj:`pathlib.Path`
         :param default_nexus_path: default nexus path
         :type default_nexus_path: :obj:`str`
         :param max_write_interval: max write interval
@@ -382,6 +384,7 @@ class NXSFile:
         """
         self.__scan = scan
         self.__default_nexus_path = default_nexus_path
+        self.__fpath = fpath
         self.__mfile = None
         self.__cursors = {}
         self.__nxfields = {}
@@ -401,7 +404,7 @@ class NXSFile:
         """ create nexus structure
         """
         si = self.__scan.info
-        filename = si["filename"]
+        filename = str(self.__fpath.absolute())   #  si["filename"]
         snapshot = {}
         if "snapshot" in si:
             snapshot = si["snapshot"]
