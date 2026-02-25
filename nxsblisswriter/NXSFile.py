@@ -82,6 +82,7 @@ NOATTRS = {"name", "label", "dtype", "value", "nexus_path", "shape", "stream"}
 
 def create_field(grp, name, dtype, value=None, shape=None, chunk=None):
     """ create field
+
     :param n: group name
     :type n: :obj:`str`
     :param type_code: nexus field type
@@ -188,6 +189,8 @@ def first(array):
 
 
 def write_attr(am, name, dtype, value, item=None):
+    """ write attribute
+    """
 
     try:
         at = am[name]
@@ -256,6 +259,8 @@ def write_attr(am, name, dtype, value, item=None):
 
 
 def write_snapshot_item(root, item, default_nexus_path=None):
+    """ write snapshot item
+    """
     nxpath = item.get('nexus_path', default_nexus_path)
     value = item.get('value', None)
     dtype = item.get('dtype', None)

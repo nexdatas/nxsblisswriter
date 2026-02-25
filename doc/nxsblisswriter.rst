@@ -1,5 +1,5 @@
 nxsblisswriter package
-=================
+======================
 
 Submodules
 ----------
