@@ -255,8 +255,8 @@ def write_attr(am, name, dtype, value, item=None):
         # print(at, dir(at))
 
 
-def write_snapshot_item(root, item):
-    nxpath = item.get('nexus_path', None)
+def write_snapshot_item(root, item, default_nexus_path=None):
+    nxpath = item.get('nexus_path', default_nexus_path)
     value = item.get('value', None)
     dtype = item.get('dtype', None)
     if dtype == "string":
@@ -320,11 +320,15 @@ def write_snapshot_item(root, item):
                 print("WRII", am, nanm, dtp, avl, item, str(e))
 
 
-def create_nexus_file(scan):
+def create_nexus_file(scan,
+                      default_nexus_path="/scan{serialno}:NXentry/"
+                      "instrument:NXinstrument/collection"):
     """ open nexus file
 
     :param scan: blissdata scan
     :type scan: :obj:`blissdata.redis_engine.scan.Scan`
+    :param default_nexus_path: default nexus path
+   :type default_nexus_path: :obj:`str`
     :returns: nexus file object
     :rtype: :obj:`NXSFile`
     """
@@ -336,7 +340,20 @@ def create_nexus_file(scan):
     if not fdir.is_dir():
         fdir.mkdir(parents=True)
 
-    nxsfl = NXSFile(scan)
+    number = scan.number
+    serialno = ""
+    entryname = "entry"
+    snapshot = {}
+    si = scan.info
+    if "snapshot" in si:
+        snapshot = si["snapshot"]
+        if serialno in snapshot.keys() and "value" in snapshot["serialno"]:
+            serialno = snapshot["serialno"]["value"]
+        if entryname in snapshot.keys() and "value" in snapshot["entryname"]:
+            entryname = snapshot["entryname"]["value"]
+
+    nxsfl = NXSFile(scan, default_nexus_path.format(
+        number=number, serialno=serialno, entryname=entryname))
     # ?? append mode
     if not fpath.exists():
         nxsfl.create_file_structure()
@@ -345,13 +362,21 @@ def create_nexus_file(scan):
 
 class NXSFile:
 
-    def __init__(self, scan, fpath=None, max_write_interval=1):
+    def __init__(self, scan,
+                 default_nexus_path="/scan{serialno}:NXentry/"
+                 "instrument:NXinstrument/collection",
+                 max_write_interval=1):
         """ constructor
 
         :param scan: blissdata scan
         :type scan: :obj:`blissdata.redis_engine.scan.Scan`
+        :param default_nexus_path: default nexus path
+        :type default_nexus_path: :obj:`str`
+        :param max_write_interval: max write interval
+        :type max_write_interval: :obj:`int`
         """
         self.__scan = scan
+        self.__default_nexus_path = default_nexus_path
         self.__mfile = None
         self.__cursors = {}
         self.__nxfields = {}
@@ -419,7 +444,9 @@ class NXSFile:
                 if not strategy or strategy in ["INIT"]:
                     try:
                         # print("WRITE", ds, strategy)
-                        write_snapshot_item(root, item)
+                        write_snapshot_item(
+                            root, item,
+                            "%s/%s" % (self.__default_nexus_path, ds))
                     except Exception as e:
                         print("Error: ", ds, strategy, item, str(e))
                         break
@@ -442,7 +469,9 @@ class NXSFile:
                 self.__cursors[key] = stream.cursor()
                 shape = [0] + list(stream.shape)
                 chunk = [1] + list(stream.shape)
-                nxpath = ch.get('nexus_path', None)
+                nxpath = ch.get(
+                    'nexus_path',
+                    "%s/%s" % (self.__default_nexus_path, key))
                 dtype = str(stream.dtype)
                 if hasattr(dtype, "__name__"):
                     dtype = str(dtype.__name__)
@@ -526,7 +555,9 @@ class NXSFile:
                 if strategy in ["FINAL"]:
                     try:
                         # print("WRITE", ds, strategy)
-                        write_snapshot_item(root, item)
+                        write_snapshot_item(
+                            root, item,
+                            "%s/%s" % (self.__default_nexus_path, ds))
                     except Exception as e:
                         print("Error: ", ds, strategy, item, str(e))
                         break

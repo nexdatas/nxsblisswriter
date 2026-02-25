@@ -31,7 +31,9 @@ from .NXSFile import create_nexus_file
 
 class NXSWriterService:
 
-    def __init__(self, redis_url, session, next_scan_timeout):
+    def __init__(self, redis_url, session, next_scan_timeout,
+                 default_nexus_path="/scan{serialno}:NXentry/"
+                 "instrument:NXinstrument/collection"):
         """ constructor
 
         :param redis_url: blissdata redis url
@@ -40,12 +42,16 @@ class NXSWriterService:
         :type session: :obj:`str`
         :param next_scan_timeout: timeout  between the scans in seconds
         :type next_scan_timeout: :obj:`int`
+        :param default_nexus_path: default nexus path
+        :type default_nexus_path: :obj:`str`
 
         """
         #: (:obj:`bool`) service running flag
         self.__running = False
         #: (:obj:`int`) scan timeout in seconds
         self.__next_scan_timeout = next_scan_timeout
+        #: (:obj:`str`) default nexus path
+        self.__default_nexus_path = default_nexus_path
         #: (:obj:`str`) session name
         self.__session = session
         #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
@@ -89,7 +95,7 @@ class NXSWriterService:
             scan.update()
         print("SCAN", scan.number)
 
-        nxsfl = create_nexus_file(scan)
+        nxsfl = create_nexus_file(scan, self.__default_nexus_path)
         if nxsfl is None:
             return
 
