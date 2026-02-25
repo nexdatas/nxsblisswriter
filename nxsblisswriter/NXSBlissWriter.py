@@ -71,7 +71,7 @@ class NXSBlissWriter(Device):
 
     DefaultNeXusPath = device_property(
         dtype='str',
-        default_value="/scan$var.serialno:NXentry/"
+        default_value="/scan{serialno}:NXentry/"
         "instrument:NXinstrument/collection",
         doc="default NeXus path"
     )

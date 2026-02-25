@@ -1,5 +1,6 @@
 2026-02-25 Jan Kotanski <jankotan@gmail.com>
 	* add checks for attribute shape before writing it (#5)
+	* add DefaultNexusPath property (#6)
 	* tagged as v0.0.2
 
 2026-02-12 Jan Kotanski <jankotan@gmail.com>
