@@ -1,0 +1,44 @@
+.TH NXSBlissWriter 1 "2021-02-13" NXSBlissWriter
+.SH NAME
+.B NXSBlissWriter
+\- Data Writer for Nexus Files
+
+.SH SYNOPSIS
+.B  NXSBlissWriter
+.I <instance_name>
+[-v[trace level]] [-file=<file_name> | -nodb [-dlist <device name list>] ]
+] 
+
+
+.SH DESCRIPTION
+.B NXSBlissWriter
+is a Tango server which allows to store NeXuS Data in H5 files from blissdata2.
+The server provides storing data from other Tango devices, various databases 
+as well as passed by a user client via JSON strings.
+
+
+.SH OPTIONS
+.\".IP "--version"
+.\"show program's version number and exit
+.IP "-v"
+trace level
+.IP "-file"
+file name
+.IP "-nodb"
+without DB
+.IP "-dlist"
+device name list        
+
+.SH SEE ALSO
+https://github.com/jkotan/nexdatas/
+
+.SH COPYRIGHT
+Copyrights (c) 2026, GNU GPL v2, DESY, Jan Kotanski
+
+.SH BUGS
+Please report bugs on the project's mailing list:
+mailto://jankotan@gmail.com
+
+.SH AUTHORS
+Jan Kotanski <jankotan@gmail.com>, 
+
