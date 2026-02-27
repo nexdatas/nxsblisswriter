@@ -86,7 +86,8 @@ class NXSBlissWriter(Device):
         self.info_stream("Initializing device...")
         self.nxs_writer_service = NWS(
             self.RedisUrl, self.Session, self.NextScanTimeout,
-            self.DefaultNeXusPath)
+            self.DefaultNeXusPath,
+            self)
         self.Start()
 
     def dev_status(self):

@@ -19,6 +19,7 @@
 
 """ Provides the access to a database with NDTS configuration files """
 
+import weakref
 # import time
 
 from blissdata.redis_engine.store import DataStore
@@ -27,13 +28,14 @@ from blissdata.redis_engine.scan import ScanState
 from blissdata.redis_engine.exceptions import NoScanAvailable
 
 from .NXSFile import create_nexus_file
+from .StreamSet import StreamSet
 
 
 class NXSWriterService:
 
     def __init__(self, redis_url, session, next_scan_timeout,
                  default_nexus_path="/scan{serialno}:NXentry/"
-                 "instrument:NXinstrument/collection"):
+                 "instrument:NXinstrument/collection", server=None):
         """ constructor
 
         :param redis_url: blissdata redis url
@@ -44,8 +46,11 @@ class NXSWriterService:
         :type next_scan_timeout: :obj:`int`
         :param default_nexus_path: default nexus path
         :type default_nexus_path: :obj:`str`
-
+        :param server: NXSConfigServer instance
+        :type server: :class:`tango.LatestDeviceImpl`
         """
+        #: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set
+        self._streams = StreamSet(weakref.ref(server) if server else None)
         #: (:obj:`bool`) service running flag
         self.__running = False
         #: (:obj:`int`) scan timeout in seconds
@@ -93,26 +98,33 @@ class NXSWriterService:
         """
         while scan.state < ScanState.PREPARED:
             scan.update()
-        print("SCAN", scan.number)
+        self._streams.info(
+            "NXSWriterService::write_scan CREATE FILE: %s" % scan.number)
 
-        nxsfl = create_nexus_file(scan, self.__default_nexus_path)
+        nxsfl = create_nexus_file(
+            scan,
+            self._streams,
+            self.__default_nexus_path)
         if nxsfl is None:
             return
 
-        print("SCAN INIT", scan.number)
+        self._streams.info(
+            "NXSWriterService::write_scan INIT: %s" % scan.number)
         nxsfl.write_init_snapshot()
 
         nxsfl.prepareChannels()
 
         while scan.state < ScanState.STOPPED:
             scan.update(block=False)
-            print("SCAN POINT", scan.number)
+            self._streams.debug(
+                "NXSWriterService::write_scan SCAN POINT: %s" % scan.number)
             nxsfl.write_scan_points()
 
         while scan.state < ScanState.CLOSED:
             scan.update()
 
-        print("SCAN FINAL", scan.number)
+        self._streams.info(
+            "NXSWriterService::write_scan FINAL: %s" % scan.number)
         nxsfl.write_final_snapshot()
         nxsfl.close()
 

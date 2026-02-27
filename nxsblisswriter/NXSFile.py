@@ -80,91 +80,6 @@ ATTRDESC = {
 NOATTRS = {"name", "label", "dtype", "value", "nexus_path", "shape", "stream"}
 
 
-def create_field(grp, name, dtype, value=None, shape=None, chunk=None):
-    """ create field
-
-    :param n: group name
-    :type n: :obj:`str`
-    :param type_code: nexus field type
-    :type type_code: :obj:`str`
-    :param shape: shape
-    :type shape: :obj:`list` < :obj:`int` >
-    :param chunk: chunk
-    :type chunk: :obj:`list` < :obj:`int` >
-    :param dfilter: filter deflater
-    :type dfilter: :class:`H5CppDataFilter`
-    :returns: file tree field
-    :rtype: :class:`H5CppField`
-    """
-    # print("CREATE", name, dtype, value, shape, chunk)
-    dcpl = h5cpp.property.DatasetCreationList()
-    if shape is None and hasattr(value, "shape"):
-        shape = value.shape
-    elif dtype in ["str", "unicode", "string"]:
-        dataspace = h5cpp.dataspace.Scalar()
-        field = h5cpp.node.Dataset(
-            grp, h5cpp.Path(name), PTH[dtype], dataspace,
-            dcpl=dcpl)
-        if value is not None:
-            field.write(value)
-        return field
-    shape = shape or [1]
-    dataspace = h5cpp.dataspace.Simple(
-        tuple(shape), tuple([h5cpp.dataspace.UNLIMITED] * len(shape)))
-    if chunk is None:
-        chunk = [(dm if dm != 0 else 1) for dm in shape]
-    dcpl.layout = h5cpp.property.DatasetLayout.CHUNKED
-    dcpl.chunk = tuple(chunk)
-    field = h5cpp.node.Dataset(
-        grp, h5cpp.Path(name), PTH[dtype], dataspace, dcpl=dcpl)
-    if value is not None:
-        field.write(value)
-    return field
-
-
-def create_groupfield(root, lnxpath, dtype,
-                      value=None, shape=None, chunk=None):
-    """ create field
-
-    :param root: root object
-    :type root: :class:`nxgroup`
-    :param lnxpath: nexus path list
-    :type lnxpath: :obj:`list` <:obj:`str`>
-    :param dtype: nexus field type
-    :type dtype: :obj:`str`
-    :param value: field value
-    :type value: :obj:`any`
-    :param shape: shape
-    :type shape: :obj:`list` < :obj:`int` >
-    :param chunk: chunk
-    :type chunk: :obj:`list` < :obj:`int` >
-    :returns: nexus field
-    :rtype: :class:`nxfield`
-    """
-    grp = root
-    for gr in lnxpath[:-1]:
-        gn = gr
-        gt = None
-        if ":" in gr:
-            gn, gt = gr.split(":")
-
-        if grp.has_group(gn):
-            grp = grp.get_group(gn)
-        else:
-            grp = h5cpp.node.Group(grp, gn)
-            if gt is not None:
-                grp.attributes.create(
-                    "NX_class",
-                    h5cpp.datatype.kVariableString).write(gt)
-        # print(gn)
-    name = lnxpath[-1]
-    if isinstance(value, list):
-        value = np.array(value, dtype=dtype)
-    # print("CREATE %s (%s)" % (nxpath, dtype))
-    dataset = create_field(grp, name, dtype, value, shape, chunk)
-    return dataset
-
-
 def first(array):
     """  get first element if the only
 
@@ -188,152 +103,18 @@ def first(array):
     return array
 
 
-def write_attr(am, name, dtype, value, item=None):
-    """ write attribute
-    """
-
-    try:
-        at = am[name]
-        # print("TYPE",name, value, at.dataspace.type)
-    except Exception:
-        at = None
-    if at is None:
-        try:
-            vshape = None
-            if isinstance(value, list):
-                vshape = np.array(value).shape
-            elif hasattr(value, "shape"):
-                vshape = value.shape
-            if not vshape:
-                at = am.create(name, PTH[str(dtype)])
-            else:
-                at = am.create(name, PTH[str(dtype)], vshape)
-        except Exception as e:
-            print("CREATE ATT", name, dtype, PTH[dtype])
-            print("WWAA", name, name, dtype, value, type(value), item)
-            print(str(e))
-    try:
-        if at is not None:
-            try:
-                try:
-                    rvalue = at.read()
-                except Exception:
-                    rvalue = None
-                ashape = None
-                vshape = None
-                if isinstance(value, list):
-                    vshape = np.array(value).shape
-                elif hasattr(value, "shape"):
-                    vshape = value.shape
-                if at.dataspace.type == h5cpp.dataspace.Type.SCALAR:
-                    rvalue = first(rvalue)
-                else:
-                    ashape = at.dataspace.current_dimensions
-                if str(rvalue) != str(value):
-                    if ashape != vshape:
-                        am.remove(name)
-                        at = am.create(name, PTH[str(dtype)], vshape)
-                    at.write(value)
-                    # print("WRITE", am, name, dtype, value,
-                    #       type(value), rvalue)
-                    # print("DIFF", name, str(value), str(rvalue))
-                else:
-                    pass
-                    # print("THE SAME", name, value)
-            except Exception as e:
-                print("ERROR", str(e), am, name, dtype, value, item)
-                # print("at", at.read(), dir(at))
-                shape = None
-                if hasattr(at.dataspace, "current_dimensions"):
-                    shape = at.dataspace.current_dimensions
-                if shape:
-                    if not isinstance(value, list) and \
-                            not hasattr(value, "shape"):
-                        value = json.loads(value)
-                at.write(value)
-    except Exception as e:
-        # print("READ", at.read())
-        print("ERROR2", str(e), am, name, dtype, value, item)
-        # print("WW", am, name, dtype, value, item)
-        # print(at, dir(at))
-
-
-def write_snapshot_item(root, item, default_nexus_path=None):
-    """ write snapshot item
-    """
-    nxpath = item.get('nexus_path', default_nexus_path)
-    value = item.get('value', None)
-    dtype = item.get('dtype', None)
-    if dtype == "string":
-        dtype = "str"
-    dataset = None
-    if nxpath and value is not None:
-        attr = None
-        if "@" in nxpath:
-            nxpath, attr = nxpath.split("@", 1)
-        lnxpath = nxpath.split("/")
-        h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
-        try:
-            if not attr:
-                dataset = root.get_dataset(h5path)
-                if dataset.dataspace.type != \
-                        h5cpp.dataspace.Type.SCALAR:
-                    if not dataset.dataspace.size:
-                        try:
-                            dataset.extent(0, 1)
-                        except Exception:
-                            pass
-                dataset.write(value)
-            else:
-                if ":" not in lnxpath:
-                    try:
-                        adataset = root.get_dataset(h5path)
-                        am = adataset.attributes
-                    except Exception:
-                        group = root.get_group(h5path)
-                        am = group.attributes
-                else:
-                    group = root.get_group(h5path)
-                    am = group.attributes
-                write_attr(am, attr, dtype, value)
-        except Exception as e:
-            # print(nxpath, str(e))
-            if str(e).startswith("No node ["):
-                dataset = create_groupfield(
-                    root, lnxpath, dtype, value)
-            else:
-                print("ERROR", str(e), type(e))
-                raise
-    if dataset is not None:
-        attrs = set(item.keys()) - NOATTRS
-        am = dataset.attributes
-        for anm in attrs:
-            avl = item[anm]
-            if isinstance(avl, list):
-                av = avl[0]
-                while isinstance(av, list) and len(av):
-                    av = av[0]
-                dtp = str(type(av).__name__)
-            elif hasattr(avl, "dtype"):
-                dtp = str(dtype.__name__)
-            else:
-                dtp = str(type(avl).__name__)
-            nanm = ATTRDESC.get(anm, anm)
-            try:
-                write_attr(am, nanm, dtp, avl, item)
-            except Exception as e:
-                print("WRII", am, nanm, dtp, avl, item, str(e))
-
-
 def create_nexus_file(scan,
+                      streams,
                       default_nexus_path="/scan{serialno}:NXentry/"
                       "instrument:NXinstrument/collection"):
     """ open nexus file
 
     :param scan: blissdata scan
     :type scan: :obj:`blissdata.redis_engine.scan.Scan`
+    :param streams: tango-like steamset class
+    :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`
     :param default_nexus_path: default nexus path
-   :type default_nexus_path: :obj:`str`
+    :type default_nexus_path: :obj:`str`
     :returns: nexus file object
     :rtype: :obj:`NXSFile`
     """
@@ -357,8 +138,10 @@ def create_nexus_file(scan,
         if entryname in snapshot.keys() and "value" in snapshot["entryname"]:
             entryname = snapshot["entryname"]["value"]
 
-    nxsfl = NXSFile(scan, fpath, default_nexus_path.format(
-        number=number, serialno=serialno, entryname=entryname))
+    nxsfl = NXSFile(scan, fpath,
+                    streams,
+                    default_nexus_path.format(
+                        number=number, serialno=serialno, entryname=entryname))
     # ?? append mode
     if not fpath.exists():
         nxsfl.create_file_structure()
@@ -367,7 +150,7 @@ def create_nexus_file(scan,
 
 class NXSFile:
 
-    def __init__(self, scan, fpath,
+    def __init__(self, scan, fpath, streams,
                  default_nexus_path="/scan{serialno}:NXentry/"
                  "instrument:NXinstrument/collection",
                  max_write_interval=1):
@@ -377,14 +160,18 @@ class NXSFile:
         :type scan: :obj:`blissdata.redis_engine.scan.Scan`
         :param fpath: nexus file path
         :type fpath: :obj:`pathlib.Path`
+        :param streams: tango-like steamset class
+        :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`
         :param default_nexus_path: default nexus path
         :type default_nexus_path: :obj:`str`
         :param max_write_interval: max write interval
         :type max_write_interval: :obj:`int`
         """
         self.__scan = scan
-        self.__default_nexus_path = default_nexus_path
         self.__fpath = fpath
+        #: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set
+        self._streams = streams
+        self.__default_nexus_path = default_nexus_path
         self.__mfile = None
         self.__cursors = {}
         self.__nxfields = {}
@@ -412,7 +199,8 @@ class NXSFile:
         try:
             xmlc = snapshot["nxsdatawriter_xmlsettings"]["value"]
         except Exception as e:
-            print(str(e))
+            self._streams.error(
+                "NXSFile::create_file_structure( )- %s" % (str(e)))
             xmlc = None
         if xmlc:
             xmlc1 = xmlc.replace('"NX_DATE_TIME"', '"NX_CHAR"')
@@ -452,11 +240,13 @@ class NXSFile:
                 if not strategy or strategy in ["INIT"]:
                     try:
                         # print("WRITE", ds, strategy)
-                        write_snapshot_item(
+                        self.write_snapshot_item(
                             root, item,
                             "%s/%s" % (self.__default_nexus_path, ds))
                     except Exception as e:
-                        print("Error: ", ds, strategy, item, str(e))
+                        self._streams.error(
+                            "NXSFile::write_init_snapshot() %s %s %s %s"
+                            % (ds, strategy, item, str(e)))
                         break
             else:
                 continue
@@ -493,11 +283,12 @@ class NXSFile:
                 except Exception as e:
                     if str(e).startswith("No node ["):
                         # print("S", key, shape, chunk, stream.dtype, ch)
-                        self.__nxfields[key] = create_groupfield(
+                        self.__nxfields[key] = self.create_groupfield(
                             root, lnxpath, dtype, value=None,
                             shape=shape, chunk=chunk)
                     else:
-                        print("ERROR", str(e), type(e))
+                        self._streams.error(
+                            "NXSFile::prepareChannels() - " % (str(e)))
                         raise
 
     def write_scan_points(self):
@@ -509,12 +300,16 @@ class NXSFile:
 
         for ch in self.channels:
             if "stream" in ch and ch["stream"] not in ["stream"]:
-                print("SKIP", ch["label"])
+                self._streams.info(
+                    "NXSFile::write_scan_point() - "
+                    "SKIP {}".format(ch["label"]))
                 continue
             try:
                 val = self.__cursors[ch["label"]].read()
             except EndOfStream:
-                print("END of STREAM")
+                self._streams.error(
+                    "NXSFile::write_scan_point() - "
+                    "End of stream for ct column {}".format(ch))
                 return
             try:
                 key = ch["label"]
@@ -537,9 +332,9 @@ class NXSFile:
                         # print(offset, block)
                         self.__nxfields[key].write(values, selection)
             except Exception as e:
-                print(ch)
-                print(key, values)
-                print(str(e))
+                self._streams.error(
+                    "NXSFile::write_scan_points()- %s %s %s %s"
+                    % (ch, key, values, str(e)))
         # npoints = len(values[0])
 
         # for i in range(npoints):
@@ -563,15 +358,244 @@ class NXSFile:
                 if strategy in ["FINAL"]:
                     try:
                         # print("WRITE", ds, strategy)
-                        write_snapshot_item(
+                        self.write_snapshot_item(
                             root, item,
                             "%s/%s" % (self.__default_nexus_path, ds))
                     except Exception as e:
-                        print("Error: ", ds, strategy, item, str(e))
+                        self._streams.error(
+                            "NXSFile::write_final_snapshot() %s %s %s %s"
+                            % (ds, strategy, item, str(e)))
                         break
             else:
                 continue
             break
+
+    def create_field(self, grp, name, dtype,
+                     value=None, shape=None, chunk=None):
+        """ create field
+
+        :param n: group name
+        :type n: :obj:`str`
+        :param type_code: nexus field type
+        :type type_code: :obj:`str`
+        :param shape: shape
+        :type shape: :obj:`list` < :obj:`int` >
+        :param chunk: chunk
+        :type chunk: :obj:`list` < :obj:`int` >
+        :param dfilter: filter deflater
+        :type dfilter: :class:`H5CppDataFilter`
+        :returns: file tree field
+        :rtype: :class:`H5CppField`
+        """
+        # print("CREATE", name, dtype, value, shape, chunk)
+        dcpl = h5cpp.property.DatasetCreationList()
+        if shape is None and hasattr(value, "shape"):
+            shape = value.shape
+        elif dtype in ["str", "unicode", "string"]:
+            dataspace = h5cpp.dataspace.Scalar()
+            field = h5cpp.node.Dataset(
+                grp, h5cpp.Path(name), PTH[dtype], dataspace,
+                dcpl=dcpl)
+            if value is not None:
+                field.write(value)
+            return field
+        shape = shape or [1]
+        dataspace = h5cpp.dataspace.Simple(
+            tuple(shape), tuple([h5cpp.dataspace.UNLIMITED] * len(shape)))
+        if chunk is None:
+            chunk = [(dm if dm != 0 else 1) for dm in shape]
+        dcpl.layout = h5cpp.property.DatasetLayout.CHUNKED
+        dcpl.chunk = tuple(chunk)
+        field = h5cpp.node.Dataset(
+            grp, h5cpp.Path(name), PTH[dtype], dataspace, dcpl=dcpl)
+        if value is not None:
+            field.write(value)
+        return field
+
+    def create_groupfield(self, root, lnxpath, dtype,
+                          value=None, shape=None, chunk=None):
+        """ create field
+
+        :param root: root object
+        :type root: :class:`nxgroup`
+        :param lnxpath: nexus path list
+        :type lnxpath: :obj:`list` <:obj:`str`>
+        :param dtype: nexus field type
+        :type dtype: :obj:`str`
+        :param value: field value
+        :type value: :obj:`any`
+        :param shape: shape
+        :type shape: :obj:`list` < :obj:`int` >
+        :param chunk: chunk
+        :type chunk: :obj:`list` < :obj:`int` >
+        :returns: nexus field
+        :rtype: :class:`nxfield`
+        """
+        grp = root
+        for gr in lnxpath[:-1]:
+            gn = gr
+            gt = None
+            if ":" in gr:
+                gn, gt = gr.split(":")
+
+            if grp.has_group(gn):
+                grp = grp.get_group(gn)
+            else:
+                grp = h5cpp.node.Group(grp, gn)
+                if gt is not None:
+                    grp.attributes.create(
+                        "NX_class",
+                        h5cpp.datatype.kVariableString).write(gt)
+            # print(gn)
+        name = lnxpath[-1]
+        if isinstance(value, list):
+            value = np.array(value, dtype=dtype)
+        # print("CREATE %s (%s)" % (nxpath, dtype))
+        dataset = self.create_field(grp, name, dtype, value, shape, chunk)
+        return dataset
+
+    def write_attr(self, am, name, dtype, value, item=None):
+        """ write attribute
+        """
+
+        try:
+            at = am[name]
+            # print("TYPE",name, value, at.dataspace.type)
+        except Exception:
+            at = None
+        if at is None:
+            try:
+                vshape = None
+                if isinstance(value, list):
+                    vshape = np.array(value).shape
+                elif hasattr(value, "shape"):
+                    vshape = value.shape
+                if not vshape:
+                    at = am.create(name, PTH[str(dtype)])
+                else:
+                    at = am.create(name, PTH[str(dtype)], vshape)
+            except Exception as e:
+                self._streams.error(
+                    "NXSFile::write_attr() - %s %s %s %s"
+                    % (name, dtype, PTH[str(dtype)], str(e)))
+        try:
+            if at is not None:
+                try:
+                    try:
+                        rvalue = at.read()
+                    except Exception:
+                        rvalue = None
+                    ashape = None
+                    vshape = None
+                    if isinstance(value, list):
+                        vshape = np.array(value).shape
+                    elif hasattr(value, "shape"):
+                        vshape = value.shape
+                    if at.dataspace.type == h5cpp.dataspace.Type.SCALAR:
+                        rvalue = first(rvalue)
+                    else:
+                        ashape = at.dataspace.current_dimensions
+                    if str(rvalue) != str(value):
+                        if ashape != vshape:
+                            am.remove(name)
+                            at = am.create(name, PTH[str(dtype)], vshape)
+                        at.write(value)
+                        # print("WRITE", am, name, dtype, value,
+                        #       type(value), rvalue)
+                        # print("DIFF", name, str(value), str(rvalue))
+                    else:
+                        pass
+                        # print("THE SAME", name, value)
+                except Exception as e:
+                    self._streams.error(
+                        "NXSFile::write_attr() - %s %s %s %s"
+                        % (name, dtype, PTH[str(dtype)], str(e)))
+                    # print("at", at.read(), dir(at))
+                    shape = None
+                    if hasattr(at.dataspace, "current_dimensions"):
+                        shape = at.dataspace.current_dimensions
+                    if shape:
+                        if not isinstance(value, list) and \
+                                not hasattr(value, "shape"):
+                            value = json.loads(value)
+                    at.write(value)
+        except Exception as e:
+            # print("READ", at.read())
+            self._streams.error(
+                "NXSFile::write_attr() - %s %s %s %s %s"
+                % (name, am, dtype, PTH[str(dtype)], str(e)))
+            # print("WW", am, name, dtype, value, item)
+            # print(at, dir(at))
+
+    def write_snapshot_item(self, root, item, default_nexus_path=None):
+        """ write snapshot item
+        """
+        nxpath = item.get('nexus_path', default_nexus_path)
+        value = item.get('value', None)
+        dtype = item.get('dtype', None)
+        if dtype == "string":
+            dtype = "str"
+        dataset = None
+        if nxpath and value is not None:
+            attr = None
+            if "@" in nxpath:
+                nxpath, attr = nxpath.split("@", 1)
+            lnxpath = nxpath.split("/")
+            h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
+            try:
+                if not attr:
+                    dataset = root.get_dataset(h5path)
+                    if dataset.dataspace.type != \
+                            h5cpp.dataspace.Type.SCALAR:
+                        if not dataset.dataspace.size:
+                            try:
+                                dataset.extent(0, 1)
+                            except Exception:
+                                pass
+                    dataset.write(value)
+                else:
+                    if ":" not in lnxpath:
+                        try:
+                            adataset = root.get_dataset(h5path)
+                            am = adataset.attributes
+                        except Exception:
+                            group = root.get_group(h5path)
+                            am = group.attributes
+                    else:
+                        group = root.get_group(h5path)
+                        am = group.attributes
+                    self.write_attr(am, attr, dtype, value)
+            except Exception as e:
+                # print(nxpath, str(e))
+                if str(e).startswith("No node ["):
+                    dataset = self.create_groupfield(
+                        root, lnxpath, dtype, value)
+                else:
+                    self._streams.error(
+                        "NXSFile::write_snapshot_item() - %s %s %s %s"
+                        % (am, dtype, PTH[str(dtype)], str(e)))
+                    raise
+        if dataset is not None:
+            attrs = set(item.keys()) - NOATTRS
+            am = dataset.attributes
+            for anm in attrs:
+                avl = item[anm]
+                if isinstance(avl, list):
+                    av = avl[0]
+                    while isinstance(av, list) and len(av):
+                        av = av[0]
+                    dtp = str(type(av).__name__)
+                elif hasattr(avl, "dtype"):
+                    dtp = str(dtype.__name__)
+                else:
+                    dtp = str(type(avl).__name__)
+                nanm = ATTRDESC.get(anm, anm)
+                try:
+                    self.write_attr(am, nanm, dtp, avl, item)
+                except Exception as e:
+                    self._streams.error(
+                        "NXSFile::write_snapshot_item() - %s %s %s %s %s %s"
+                        % (am, nanm, dtp, avl, item, str(e)))
 
     def close(self):
         """ close file

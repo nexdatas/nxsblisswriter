@@ -1,3 +1,7 @@
+2026-02-27 Jan Kotanski <jankotan@gmail.com>
+	* add support for tango streams (#12)
+	* tagged as v0.0.4
+
 2026-02-25 Jan Kotanski <jankotan@gmail.com>
 	* add delete_device method (#10)
 	* change suffix if needed (#10)
