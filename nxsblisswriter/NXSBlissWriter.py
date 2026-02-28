@@ -46,6 +46,9 @@ class NXSBlissWriter(Device):
         DefaultNeXusPath
             - default NeXus path
             - Type:'str'
+        PointSleepTime
+            - sleep time between write_point command calls
+            - Type:'float'
     """
 
     # -----------------
@@ -76,6 +79,12 @@ class NXSBlissWriter(Device):
         doc="default NeXus path"
     )
 
+    PointSleepTime = device_property(
+        dtype='float',
+        default_value=0.01,
+        doc="sleep time between write_point command calls"
+    )
+
     # ---------------
     # General methods
     # ---------------
@@ -87,7 +96,9 @@ class NXSBlissWriter(Device):
         self.nxs_writer_service = NWS(
             self.RedisUrl, self.Session, self.NextScanTimeout,
             self.DefaultNeXusPath,
-            self)
+            self.PointSleepTime,
+            self
+        )
         self.Start()
 
     def dev_status(self):
