@@ -1,4 +1,8 @@
-2026-02-27 Jan Kotanski <jankotan@gmail.com>
+2026-02-28 Jan Kotanski <jankotan@gmail.com>
+	* stop writing scan points on stop command (#19)
+	* tagged as v0.0.6
+
+2026-02-28 Jan Kotanski <jankotan@gmail.com>
 	* end writing on EndOfStream (#16)
 	* tagged as v0.0.5
 

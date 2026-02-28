@@ -120,7 +120,7 @@ class NXSWriterService:
         nxsfl.prepareChannels()
 
         # while scan.state < ScanState.STOPPED:
-        while True:
+        while self.__running:
             try:
                 scan.update(block=False)
                 self._streams.debug(
