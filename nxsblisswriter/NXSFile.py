@@ -298,6 +298,9 @@ class NXSFile:
         if (now - self.__last_write_time) < self.__max_write_interval:
             return
 
+        rs = set()
+        eos = set()
+        eose = None
         for ch in self.channels:
             if "stream" in ch and ch["stream"] not in ["stream"]:
                 self._streams.info(
@@ -305,12 +308,18 @@ class NXSFile:
                     "SKIP {}".format(ch["label"]))
                 continue
             try:
+                if ch["label"] in eos:
+                    continue
                 val = self.__cursors[ch["label"]].read()
-            except EndOfStream:
-                self._streams.info(
+                rs.add(ch["label"])
+            except EndOfStream as e:
+                self._streams.debug(
                     "NXSFile::write_scan_point() - "
                     "End of stream for ct column {}".format(ch))
-                raise
+                eose = e
+                eos.add(ch["label"])
+                continue
+                # raise
             try:
                 try:
                     key = ch["label"]
@@ -343,6 +352,11 @@ class NXSFile:
 
         # for i in range(npoints):
         self.__last_write_time = now
+        if not len(rs):
+            self._streams.info(
+                "NXSFile::write_scan_point() - "
+                "End of stream for all columns: %s" % (str(eos)))
+            raise eose
 
     def write_final_snapshot(self):
         """ write final data
