@@ -621,3 +621,6 @@ class NXSFile:
         root = self.__mfile.root()
         root.close()
         self.__mfile.close()
+        self.__mfile = None
+        self.__cursors = {}
+        self.__nxfields = {}
