@@ -307,13 +307,17 @@ class NXSFile:
             try:
                 val = self.__cursors[ch["label"]].read()
             except EndOfStream:
-                self._streams.error(
+                self._streams.info(
                     "NXSFile::write_scan_point() - "
                     "End of stream for ct column {}".format(ch))
-                return
+                raise
             try:
-                key = ch["label"]
-                values = val.get_data()
+                try:
+                    key = ch["label"]
+                    values = val.get_data()
+                except Exception as e:
+                    print(str(e))
+                    continue
                 # print("CHANNEL", ch["label"], ch["shape"], values)
                 npoints = len(values)
                 if npoints:

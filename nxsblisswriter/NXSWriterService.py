@@ -20,11 +20,11 @@
 """ Provides the access to a database with NDTS configuration files """
 
 import weakref
-# import time
+import time
 
 from blissdata.redis_engine.store import DataStore
 from blissdata.redis_engine.scan import ScanState
-# from blissdata.redis_engine.exceptions import EndOfStream
+from blissdata.redis_engine.exceptions import EndOfStream
 from blissdata.redis_engine.exceptions import NoScanAvailable
 
 from .NXSFile import create_nexus_file
@@ -35,7 +35,8 @@ class NXSWriterService:
 
     def __init__(self, redis_url, session, next_scan_timeout,
                  default_nexus_path="/scan{serialno}:NXentry/"
-                 "instrument:NXinstrument/collection", server=None):
+                 "instrument:NXinstrument/collection",
+                 point_sleep_time=0.01, server=None):
         """ constructor
 
         :param redis_url: blissdata redis url
@@ -46,6 +47,8 @@ class NXSWriterService:
         :type next_scan_timeout: :obj:`int`
         :param default_nexus_path: default nexus path
         :type default_nexus_path: :obj:`str`
+        :param point_sleep_time: sleep time between write point calls
+        :type point_sleep_time: :obj:`float`
         :param server: NXSConfigServer instance
         :type server: :class:`tango.LatestDeviceImpl`
         """
@@ -59,6 +62,8 @@ class NXSWriterService:
         self.__default_nexus_path = default_nexus_path
         #: (:obj:`str`) session name
         self.__session = session
+        #: (:obj:`float`) sleep time between write point calls
+        self.__point_sleep_time = point_sleep_time
         #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
         self.__datastore = DataStore(redis_url)
 
@@ -114,12 +119,17 @@ class NXSWriterService:
 
         nxsfl.prepareChannels()
 
-        while scan.state < ScanState.STOPPED:
-            scan.update(block=False)
-            self._streams.debug(
-                "NXSWriterService::write_scan SCAN POINT: %s" % scan.number)
-            nxsfl.write_scan_points()
-
+        # while scan.state < ScanState.STOPPED:
+        while True:
+            try:
+                scan.update(block=False)
+                self._streams.debug(
+                    "NXSWriterService::write_scan SCAN POINT: %s"
+                    % scan.number)
+                nxsfl.write_scan_points()
+                time.sleep(self.__point_sleep_time)
+            except EndOfStream:
+                break
         while scan.state < ScanState.CLOSED:
             scan.update()
 
