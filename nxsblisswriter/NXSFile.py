@@ -72,7 +72,7 @@ ATTRDESC = {
     "trans_type": "transformation_type",
     "trans_vector": "vector",
     "trans_offset": "offset",
-    "source": "nexdatas_source",
+    # "source": "nexdatas_source",
     "strategy": "nexdatas_strategy",
 }
 
@@ -278,18 +278,44 @@ class NXSFile:
                 lnxpath = nxpath.split("/")
                 h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
                 root = self.__mfile.root()
+                dataset = None
                 try:
                     self.__nxfields[key] = root.get_dataset(h5path)
+                    dataset = self.__nxfields[key]
                 except Exception as e:
                     if str(e).startswith("No node ["):
                         # print("S", key, shape, chunk, stream.dtype, ch)
                         self.__nxfields[key] = self.create_groupfield(
                             root, lnxpath, dtype, value=None,
                             shape=shape, chunk=chunk)
+                        dataset = self.__nxfields[key]
                     else:
                         self._streams.error(
                             "NXSFile::prepareChannels() - " % (str(e)))
                         raise
+                item = ch
+                if dataset is not None:
+                    attrs = set(item.keys()) - NOATTRS
+                    am = dataset.attributes
+                    for anm in attrs:
+                        avl = item[anm]
+                        if isinstance(avl, list):
+                            av = avl[0]
+                            while isinstance(av, list) and len(av):
+                                av = av[0]
+                            dtp = str(type(av).__name__)
+                        elif hasattr(avl, "dtype"):
+                            dtp = str(dtype.__name__)
+                        else:
+                            dtp = str(type(avl).__name__)
+                        nanm = ATTRDESC.get(anm, anm)
+                        try:
+                            self.write_attr(am, nanm, dtp, avl, item)
+                        except Exception as e:
+                            self._streams.error(
+                                "NXSFile::prepareChannels() "
+                                "- %s %s %s %s %s %s"
+                                % (am, nanm, dtp, avl, item, str(e)))
 
     def write_scan_points(self):
         """ write step data

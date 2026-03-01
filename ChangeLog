@@ -1,4 +1,8 @@
 2026-02-28 Jan Kotanski <jankotan@gmail.com>
+	* add attributes of streamed channels from datadesc (#26)
+	* tagged as v0.0.8
+
+2026-02-28 Jan Kotanski <jankotan@gmail.com>
 	* remove file object after closing it (#23)
 	* tagged as v0.0.7
 
