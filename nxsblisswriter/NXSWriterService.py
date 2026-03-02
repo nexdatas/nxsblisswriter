@@ -81,7 +81,7 @@ class NXSWriterService:
             except NoScanAvailable:
                 continue
             scan = self.__datastore.load_scan(key)
-            if not self.__session or scan.session == self.__session:
+            if self.__session in ["__all__", scan.session]:
                 self.write_scan(scan)
 
     def get_status(self):
