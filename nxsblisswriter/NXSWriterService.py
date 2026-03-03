@@ -102,6 +102,7 @@ class NXSWriterService:
         :type scan:
         """
         while scan.state < ScanState.PREPARED:
+            time.sleep(self.__point_sleep_time)
             scan.update()
         self._streams.info(
             "NXSWriterService::write_scan CREATE FILE: %s" % scan.number)
@@ -131,6 +132,7 @@ class NXSWriterService:
             except EndOfStream:
                 break
         while scan.state < ScanState.CLOSED:
+            time.sleep(self.__point_sleep_time)
             scan.update()
 
         self._streams.info(
