@@ -7,6 +7,7 @@
 		       
 .. include:: ../README.rst
 
+========
 Contents
 ========
 
@@ -17,6 +18,7 @@ Contents
    nxsblisswriter
    
 
+==================
 Indices and tables
 ==================
 
