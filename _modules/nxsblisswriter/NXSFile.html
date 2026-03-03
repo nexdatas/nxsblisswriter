@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nxsblisswriter.NXSFile &#8212; NXSBlissWriter 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          NXSBlissWriter</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nxsblisswriter.html">nxsblisswriter package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../nxsblisswriter.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../nxsblisswriter.html#module-nxsblisswriter.NXSFile">nxsblisswriter.NXSFile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../nxsblisswriter.html#module-nxsblisswriter.Release">nxsblisswriter.Release module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../nxsblisswriter.html#module-nxsblisswriter.NXSBlissWriter">nxsblisswriter.NXSBlissWriter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../nxsblisswriter.html#module-nxsblisswriter.NXSWriterService">nxsblisswriter.NXSWriterService module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../nxsblisswriter.html#module-nxsblisswriter">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <h1>Source code for nxsblisswriter.NXSFile</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#   This file is part of nexdatas - Tango Server for NeXus data writer</span>
+<span class="c1">#</span>
+<span class="c1">#    Copyright (C) 2026 DESY, Jan Kotanski &lt;jkotan@mail.desy.de&gt;</span>
+<span class="c1">#</span>
+<span class="c1">#    nexdatas is free software: you can redistribute it and/or modify</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1">#    (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#    nexdatas is distributed in the hope that it will be useful,</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">#    GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License</span>
+<span class="c1">#    along with nexdatas.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+
+<span class="sd">&quot;&quot;&quot; Provides the access to a database with NDTS configuration files &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">pninexus</span> <span class="kn">import</span> <span class="n">nexus</span><span class="p">,</span> <span class="n">h5cpp</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">et</span>
+<span class="kn">from</span> <span class="nn">lxml.etree</span> <span class="kn">import</span> <span class="n">XMLParser</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c1"># from blissdata.redis_engine.store import DataStore</span>
+<span class="c1"># from blissdata.redis_engine.scan import ScanState</span>
+<span class="kn">from</span> <span class="nn">blissdata.redis_engine.exceptions</span> <span class="kn">import</span> <span class="n">EndOfStream</span>
+<span class="c1"># from blissdata.redis_engine.exceptions import NoScanAvailable</span>
+
+
+<span class="n">ALLOWED_NXS_SURFIXES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;.nxs&quot;</span><span class="p">,</span> <span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;.nx&quot;</span><span class="p">}</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_npver</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">NPMAJOR</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_npver</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="n">NPMAJOR</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<span class="n">PTH</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;long&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span>
+    <span class="s2">&quot;str&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">,</span>
+    <span class="s2">&quot;unicode&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">,</span>
+    <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kEBool</span><span class="p">,</span>
+    <span class="s2">&quot;int&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt64</span><span class="p">,</span>
+    <span class="s2">&quot;int64&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt64</span><span class="p">,</span>
+    <span class="s2">&quot;int32&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt32</span><span class="p">,</span>
+    <span class="s2">&quot;int16&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt16</span><span class="p">,</span>
+    <span class="s2">&quot;int8&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt8</span><span class="p">,</span>
+    <span class="s2">&quot;uint&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt64</span><span class="p">,</span>
+    <span class="s2">&quot;uint64&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kUInt64</span><span class="p">,</span>
+    <span class="s2">&quot;uint32&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kUInt32</span><span class="p">,</span>
+    <span class="s2">&quot;uint16&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kUInt16</span><span class="p">,</span>
+    <span class="s2">&quot;uint8&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kUInt8</span><span class="p">,</span>
+    <span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kFloat32</span><span class="p">,</span>
+    <span class="s2">&quot;float64&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kFloat64</span><span class="p">,</span>
+    <span class="s2">&quot;float32&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kFloat32</span><span class="p">,</span>
+    <span class="s2">&quot;string&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">ATTRDESC</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;nexus_type&quot;</span><span class="p">:</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;depends_on&quot;</span><span class="p">:</span> <span class="s2">&quot;depends_on&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;trans_type&quot;</span><span class="p">:</span> <span class="s2">&quot;transformation_type&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;trans_vector&quot;</span><span class="p">:</span> <span class="s2">&quot;vector&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;trans_offset&quot;</span><span class="p">:</span> <span class="s2">&quot;offset&quot;</span><span class="p">,</span>
+    <span class="c1"># &quot;source&quot;: &quot;nexdatas_source&quot;,</span>
+    <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;nexdatas_strategy&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="n">NOATTRS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;nexus_path&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;stream&quot;</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="first"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.first">[docs]</a><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;  get first element if the only</span>
+
+<span class="sd">    :param array: numpy array</span>
+<span class="sd">    :type array: :class:`numpy.ndarray`</span>
+<span class="sd">    :returns: first element of the array</span>
+<span class="sd">    :type array: :obj:`any`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">NPMAJOR</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="s2">&quot;decode&quot;</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">array</span></div>
+
+
+<div class="viewcode-block" id="create_nexus_file"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.create_nexus_file">[docs]</a><span class="k">def</span> <span class="nf">create_nexus_file</span><span class="p">(</span><span class="n">scan</span><span class="p">,</span>
+                      <span class="n">streams</span><span class="p">,</span>
+                      <span class="n">default_nexus_path</span><span class="o">=</span><span class="s2">&quot;/scan</span><span class="si">{serialno}</span><span class="s2">:NXentry/&quot;</span>
+                      <span class="s2">&quot;instrument:NXinstrument/collection&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; open nexus file</span>
+
+<span class="sd">    :param scan: blissdata scan</span>
+<span class="sd">    :type scan: :obj:`blissdata.redis_engine.scan.Scan`</span>
+<span class="sd">    :param streams: tango-like steamset class</span>
+<span class="sd">    :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`</span>
+<span class="sd">    :param default_nexus_path: default nexus path</span>
+<span class="sd">    :type default_nexus_path: :obj:`str`</span>
+<span class="sd">    :returns: nexus file object</span>
+<span class="sd">    :rtype: :obj:`NXSFile`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fpath</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">scan</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">fpath</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALLOWED_NXS_SURFIXES</span><span class="p">:</span>
+        <span class="n">fpath</span> <span class="o">=</span> <span class="n">fpath</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.nxs&quot;</span><span class="p">)</span>
+
+    <span class="n">fdir</span> <span class="o">=</span> <span class="n">fpath</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fdir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">fdir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">number</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">number</span>
+    <span class="n">serialno</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">entryname</span> <span class="o">=</span> <span class="s2">&quot;entry&quot;</span>
+    <span class="n">snapshot</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">si</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">info</span>
+    <span class="k">if</span> <span class="s2">&quot;snapshot&quot;</span> <span class="ow">in</span> <span class="n">si</span><span class="p">:</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="n">si</span><span class="p">[</span><span class="s2">&quot;snapshot&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">serialno</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;serialno&quot;</span><span class="p">]:</span>
+            <span class="n">serialno</span> <span class="o">=</span> <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;serialno&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">entryname</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;entryname&quot;</span><span class="p">]:</span>
+            <span class="n">entryname</span> <span class="o">=</span> <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;entryname&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+
+    <span class="n">nxsfl</span> <span class="o">=</span> <span class="n">NXSFile</span><span class="p">(</span><span class="n">scan</span><span class="p">,</span> <span class="n">fpath</span><span class="p">,</span>
+                    <span class="n">streams</span><span class="p">,</span>
+                    <span class="n">default_nexus_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span> <span class="n">serialno</span><span class="o">=</span><span class="n">serialno</span><span class="p">,</span> <span class="n">entryname</span><span class="o">=</span><span class="n">entryname</span><span class="p">))</span>
+    <span class="c1"># ?? append mode</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fpath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">nxsfl</span><span class="o">.</span><span class="n">create_file_structure</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">nxsfl</span></div>
+
+
+<div class="viewcode-block" id="NXSFile"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile">[docs]</a><span class="k">class</span> <span class="nc">NXSFile</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">,</span> <span class="n">fpath</span><span class="p">,</span> <span class="n">streams</span><span class="p">,</span>
+                 <span class="n">default_nexus_path</span><span class="o">=</span><span class="s2">&quot;/scan</span><span class="si">{serialno}</span><span class="s2">:NXentry/&quot;</span>
+                 <span class="s2">&quot;instrument:NXinstrument/collection&quot;</span><span class="p">,</span>
+                 <span class="n">max_write_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; constructor</span>
+
+<span class="sd">        :param scan: blissdata scan</span>
+<span class="sd">        :type scan: :obj:`blissdata.redis_engine.scan.Scan`</span>
+<span class="sd">        :param fpath: nexus file path</span>
+<span class="sd">        :type fpath: :obj:`pathlib.Path`</span>
+<span class="sd">        :param streams: tango-like steamset class</span>
+<span class="sd">        :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`</span>
+<span class="sd">        :param default_nexus_path: default nexus path</span>
+<span class="sd">        :type default_nexus_path: :obj:`str`</span>
+<span class="sd">        :param max_write_interval: max write interval</span>
+<span class="sd">        :type max_write_interval: :obj:`int`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span> <span class="o">=</span> <span class="n">scan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fpath</span> <span class="o">=</span> <span class="n">fpath</span>
+        <span class="c1">#: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span> <span class="o">=</span> <span class="n">streams</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span> <span class="o">=</span> <span class="n">default_nexus_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cursors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_write_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_write_interval</span> <span class="o">=</span> <span class="n">max_write_interval</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;datadesc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NXSFile.create_file_structure"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_file_structure">[docs]</a>    <span class="k">def</span> <span class="nf">create_file_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; create nexus structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">si</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fpath</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s2">&quot;snapshot&quot;</span> <span class="ow">in</span> <span class="n">si</span><span class="p">:</span>
+            <span class="n">snapshot</span> <span class="o">=</span> <span class="n">si</span><span class="p">[</span><span class="s2">&quot;snapshot&quot;</span><span class="p">]</span>
+        <span class="n">xmls</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">xmlc</span> <span class="o">=</span> <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;nxsdatawriter_xmlsettings&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;NXSFile::create_file_structure( )- </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="n">xmlc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">xmlc</span><span class="p">:</span>
+            <span class="n">xmlc1</span> <span class="o">=</span> <span class="n">xmlc</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;NX_DATE_TIME&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;NX_CHAR&quot;&#39;</span><span class="p">)</span>
+            <span class="n">xmlc2</span> <span class="o">=</span> <span class="n">xmlc1</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;index=&quot;1&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;index=&quot;0&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s1">&#39;index=&quot;2&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;index=&quot;1&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;index=&quot;3&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;index=&quot;2&quot;&#39;</span><span class="p">)</span>
+            <span class="n">etroot</span> <span class="o">=</span> <span class="n">et</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span>
+                <span class="n">xmlc2</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="n">XMLParser</span><span class="p">(</span><span class="n">collect_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">etdims</span> <span class="o">=</span> <span class="n">etroot</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//dimensions&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">etdim</span> <span class="ow">in</span> <span class="n">etdims</span><span class="p">:</span>
+                <span class="n">dparent</span> <span class="o">=</span> <span class="n">etdim</span><span class="o">.</span><span class="n">getparent</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">dparent</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="s2">&quot;vds&quot;</span><span class="p">]:</span>
+                    <span class="n">ddparent</span> <span class="o">=</span> <span class="n">dparent</span><span class="o">.</span><span class="n">getparent</span><span class="p">()</span>
+                    <span class="n">ddparent</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">dparent</span><span class="p">)</span>
+            <span class="n">xmls</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">etroot</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;unicode&#39;</span><span class="p">,</span>
+                                  <span class="n">method</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">,</span> <span class="n">pretty_print</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span> <span class="o">=</span> <span class="n">nexus</span><span class="o">.</span><span class="n">create_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
+                                         <span class="n">h5cpp</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">AccessFlags</span><span class="o">.</span><span class="n">TRUNCATE</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">xmls</span><span class="p">:</span>
+            <span class="n">nexus</span><span class="o">.</span><span class="n">create_from_string</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">xmls</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NXSFile.write_init_snapshot"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_init_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">write_init_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; write init data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">si</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s2">&quot;snapshot&quot;</span> <span class="ow">in</span> <span class="n">si</span><span class="p">:</span>
+            <span class="n">snapshot</span> <span class="o">=</span> <span class="n">si</span><span class="p">[</span><span class="s2">&quot;snapshot&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ds</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                <span class="n">strategy</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="s2">&quot;strategy&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="n">strategy</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;strategy&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">strategy</span> <span class="ow">or</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;INIT&quot;</span><span class="p">]:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># print(&quot;WRITE&quot;, ds, strategy)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write_snapshot_item</span><span class="p">(</span>
+                            <span class="n">root</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span>
+                            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span><span class="p">,</span> <span class="n">ds</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s2">&quot;NXSFile::write_init_snapshot() </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                        <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">break</span></div>
+
+<div class="viewcode-block" id="NXSFile.prepareChannels"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.prepareChannels">[docs]</a>    <span class="k">def</span> <span class="nf">prepareChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; prepare cursors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cursors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1">#         for key, stream in self.__scan.streams.items():</span>
+        <span class="c1"># -           self.__cursors[key] = stream.cursor()</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+            <span class="c1"># print(&quot;CH&quot;, key, list(self.__scan.streams.keys()))</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">streams</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cursors</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">nxpath</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s1">&#39;nexus_path&#39;</span><span class="p">,</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+                <span class="n">dtype</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">):</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;string&quot;</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="s2">&quot;str&quot;</span>
+                <span class="n">lnxpath</span> <span class="o">=</span> <span class="n">nxpath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+                <span class="n">h5path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">nd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">nd</span> <span class="ow">in</span> <span class="n">lnxpath</span><span class="p">])</span>
+                <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">h5path</span><span class="p">)</span>
+                    <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;No node [&quot;</span><span class="p">):</span>
+                        <span class="c1"># print(&quot;S&quot;, key, shape, chunk, stream.dtype, ch)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_groupfield</span><span class="p">(</span>
+                            <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="n">chunk</span><span class="p">)</span>
+                        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s2">&quot;NXSFile::prepareChannels() - &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                        <span class="k">raise</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">ch</span>
+                <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">attrs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="n">NOATTRS</span>
+                    <span class="n">am</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attributes</span>
+                    <span class="k">for</span> <span class="n">anm</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                        <span class="n">avl</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="n">anm</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                            <span class="n">av</span> <span class="o">=</span> <span class="n">avl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">av</span><span class="p">):</span>
+                                <span class="n">av</span> <span class="o">=</span> <span class="n">av</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">av</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>
+                            <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">avl</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                        <span class="n">nanm</span> <span class="o">=</span> <span class="n">ATTRDESC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">anm</span><span class="p">,</span> <span class="n">anm</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">write_attr</span><span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s2">&quot;NXSFile::prepareChannels() &quot;</span>
+                                <span class="s2">&quot;- </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="NXSFile.write_scan_points"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_scan_points">[docs]</a>    <span class="k">def</span> <span class="nf">write_scan_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; write step data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_write_time</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_write_interval</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">rs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">eos</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">eose</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;stream&quot;</span> <span class="ow">in</span> <span class="n">ch</span> <span class="ow">and</span> <span class="n">ch</span><span class="p">[</span><span class="s2">&quot;stream&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;stream&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;NXSFile::write_scan_point() - &quot;</span>
+                    <span class="s2">&quot;SKIP </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]))</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">eos</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cursors</span><span class="p">[</span><span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">rs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span>
+            <span class="k">except</span> <span class="n">EndOfStream</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;NXSFile::write_scan_point() - &quot;</span>
+                    <span class="s2">&quot;End of stream for ct column </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ch</span><span class="p">))</span>
+                <span class="n">eose</span> <span class="o">=</span> <span class="n">e</span>
+                <span class="n">eos</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span>
+                <span class="k">continue</span>
+                <span class="c1"># raise</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+                    <span class="n">values</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="c1"># print(&quot;CHANNEL&quot;, ch[&quot;label&quot;], ch[&quot;shape&quot;], values)</span>
+                <span class="n">npoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">npoints</span><span class="p">:</span>
+                    <span class="n">oldshape</span> <span class="o">=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">current_dimensions</span>
+                    <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">oldshape</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">rank</span><span class="p">:</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">rank</span>
+                        <span class="n">block</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">oldshape</span><span class="p">)</span>
+                        <span class="n">offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldshape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">npoints</span>
+                        <span class="n">selection</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Hyperslab</span><span class="p">(</span>
+                            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">extent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">npoints</span><span class="p">)</span>
+                        <span class="c1"># print(self.__nxfields[key].dataspace.current_dimensions)</span>
+                        <span class="c1"># print(offset, block)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;NXSFile::write_scan_points()- </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="c1"># npoints = len(values[0])</span>
+
+        <span class="c1"># for i in range(npoints):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_write_time</span> <span class="o">=</span> <span class="n">now</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">rs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;NXSFile::write_scan_point() - &quot;</span>
+                <span class="s2">&quot;End of stream for all columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">eos</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="n">eose</span></div>
+
+<div class="viewcode-block" id="NXSFile.write_final_snapshot"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_final_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">write_final_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; write final data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+        <span class="n">si</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s2">&quot;snapshot&quot;</span> <span class="ow">in</span> <span class="n">si</span><span class="p">:</span>
+            <span class="n">snapshot</span> <span class="o">=</span> <span class="n">si</span><span class="p">[</span><span class="s2">&quot;snapshot&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ds</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                <span class="n">strategy</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="s2">&quot;strategy&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="n">strategy</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;strategy&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;FINAL&quot;</span><span class="p">]:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># print(&quot;WRITE&quot;, ds, strategy)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write_snapshot_item</span><span class="p">(</span>
+                            <span class="n">root</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span>
+                            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span><span class="p">,</span> <span class="n">ds</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s2">&quot;NXSFile::write_final_snapshot() </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                        <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">break</span></div>
+
+<div class="viewcode-block" id="NXSFile.create_field"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_field">[docs]</a>    <span class="k">def</span> <span class="nf">create_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
+                     <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
+
+<span class="sd">        :param n: group name</span>
+<span class="sd">        :type n: :obj:`str`</span>
+<span class="sd">        :param type_code: nexus field type</span>
+<span class="sd">        :type type_code: :obj:`str`</span>
+<span class="sd">        :param shape: shape</span>
+<span class="sd">        :type shape: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :param chunk: chunk</span>
+<span class="sd">        :type chunk: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :param dfilter: filter deflater</span>
+<span class="sd">        :type dfilter: :class:`H5CppDataFilter`</span>
+<span class="sd">        :returns: file tree field</span>
+<span class="sd">        :rtype: :class:`H5CppField`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print(&quot;CREATE&quot;, name, dtype, value, shape, chunk)</span>
+        <span class="n">dcpl</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">DatasetCreationList</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">elif</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="s2">&quot;unicode&quot;</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">]:</span>
+            <span class="n">dataspace</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Scalar</span><span class="p">()</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+                <span class="n">grp</span><span class="p">,</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">PTH</span><span class="p">[</span><span class="n">dtype</span><span class="p">],</span> <span class="n">dataspace</span><span class="p">,</span>
+                <span class="n">dcpl</span><span class="o">=</span><span class="n">dcpl</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">field</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span> <span class="ow">or</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dataspace</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Simple</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">UNLIMITED</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="p">[(</span><span class="n">dm</span> <span class="k">if</span> <span class="n">dm</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">dm</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">]</span>
+        <span class="n">dcpl</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">DatasetLayout</span><span class="o">.</span><span class="n">CHUNKED</span>
+        <span class="n">dcpl</span><span class="o">.</span><span class="n">chunk</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+            <span class="n">grp</span><span class="p">,</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">PTH</span><span class="p">[</span><span class="n">dtype</span><span class="p">],</span> <span class="n">dataspace</span><span class="p">,</span> <span class="n">dcpl</span><span class="o">=</span><span class="n">dcpl</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">field</span></div>
+
+<div class="viewcode-block" id="NXSFile.create_groupfield"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_groupfield">[docs]</a>    <span class="k">def</span> <span class="nf">create_groupfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
+                          <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
+
+<span class="sd">        :param root: root object</span>
+<span class="sd">        :type root: :class:`nxgroup`</span>
+<span class="sd">        :param lnxpath: nexus path list</span>
+<span class="sd">        :type lnxpath: :obj:`list` &lt;:obj:`str`&gt;</span>
+<span class="sd">        :param dtype: nexus field type</span>
+<span class="sd">        :type dtype: :obj:`str`</span>
+<span class="sd">        :param value: field value</span>
+<span class="sd">        :type value: :obj:`any`</span>
+<span class="sd">        :param shape: shape</span>
+<span class="sd">        :type shape: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :param chunk: chunk</span>
+<span class="sd">        :type chunk: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :returns: nexus field</span>
+<span class="sd">        :rtype: :class:`nxfield`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="k">for</span> <span class="n">gr</span> <span class="ow">in</span> <span class="n">lnxpath</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">gn</span> <span class="o">=</span> <span class="n">gr</span>
+            <span class="n">gt</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">gr</span><span class="p">:</span>
+                <span class="n">gn</span><span class="p">,</span> <span class="n">gt</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">grp</span><span class="o">.</span><span class="n">has_group</span><span class="p">(</span><span class="n">gn</span><span class="p">):</span>
+                <span class="n">grp</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">gn</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">grp</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">Group</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">gn</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">gt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">grp</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                        <span class="s2">&quot;NX_class&quot;</span><span class="p">,</span>
+                        <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gt</span><span class="p">)</span>
+            <span class="c1"># print(gn)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">lnxpath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="c1"># print(&quot;CREATE %s (%s)&quot; % (nxpath, dtype))</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataset</span></div>
+
+<div class="viewcode-block" id="NXSFile.write_attr"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_attr">[docs]</a>    <span class="k">def</span> <span class="nf">write_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">am</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; write attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">at</span> <span class="o">=</span> <span class="n">am</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="c1"># print(&quot;TYPE&quot;,name, value, at.dataspace.type)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">at</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">at</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">vshape</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">vshape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>
+                    <span class="n">vshape</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">vshape</span><span class="p">:</span>
+                    <span class="n">at</span> <span class="o">=</span> <span class="n">am</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">at</span> <span class="o">=</span> <span class="n">am</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="n">vshape</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;NXSFile::write_attr() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">at</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">rvalue</span> <span class="o">=</span> <span class="n">at</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">rvalue</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">ashape</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">vshape</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                        <span class="n">vshape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+                    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>
+                        <span class="n">vshape</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span>
+                    <span class="k">if</span> <span class="n">at</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">:</span>
+                        <span class="n">rvalue</span> <span class="o">=</span> <span class="n">first</span><span class="p">(</span><span class="n">rvalue</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">ashape</span> <span class="o">=</span> <span class="n">at</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">current_dimensions</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">rvalue</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">ashape</span> <span class="o">!=</span> <span class="n">vshape</span><span class="p">:</span>
+                            <span class="n">am</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                            <span class="n">at</span> <span class="o">=</span> <span class="n">am</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="n">vshape</span><span class="p">)</span>
+                        <span class="n">at</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                        <span class="c1"># print(&quot;WRITE&quot;, am, name, dtype, value,</span>
+                        <span class="c1">#       type(value), rvalue)</span>
+                        <span class="c1"># print(&quot;DIFF&quot;, name, str(value), str(rvalue))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                        <span class="c1"># print(&quot;THE SAME&quot;, name, value)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s2">&quot;NXSFile::write_attr() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                    <span class="c1"># print(&quot;at&quot;, at.read(), dir(at))</span>
+                    <span class="n">shape</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">at</span><span class="o">.</span><span class="n">dataspace</span><span class="p">,</span> <span class="s2">&quot;current_dimensions&quot;</span><span class="p">):</span>
+                        <span class="n">shape</span> <span class="o">=</span> <span class="n">at</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">current_dimensions</span>
+                    <span class="k">if</span> <span class="n">shape</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> \
+                                <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">at</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># print(&quot;READ&quot;, at.read())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;NXSFile::write_attr() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">am</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
+            <span class="c1"># print(&quot;WW&quot;, am, name, dtype, value, item)</span>
+            <span class="c1"># print(at, dir(at))</span>
+
+<div class="viewcode-block" id="NXSFile.write_snapshot_item"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_snapshot_item">[docs]</a>    <span class="k">def</span> <span class="nf">write_snapshot_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">default_nexus_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; write snapshot item</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nxpath</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nexus_path&#39;</span><span class="p">,</span> <span class="n">default_nexus_path</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dtype&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;string&quot;</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="s2">&quot;str&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">nxpath</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s2">&quot;@&quot;</span> <span class="ow">in</span> <span class="n">nxpath</span><span class="p">:</span>
+                <span class="n">nxpath</span><span class="p">,</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">nxpath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">lnxpath</span> <span class="o">=</span> <span class="n">nxpath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+            <span class="n">h5path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">nd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">nd</span> <span class="ow">in</span> <span class="n">lnxpath</span><span class="p">])</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="p">:</span>
+                    <span class="n">dataset</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">h5path</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> \
+                            <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">dataset</span><span class="o">.</span><span class="n">extent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lnxpath</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">adataset</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">h5path</span><span class="p">)</span>
+                            <span class="n">am</span> <span class="o">=</span> <span class="n">adataset</span><span class="o">.</span><span class="n">attributes</span>
+                        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                            <span class="n">group</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">h5path</span><span class="p">)</span>
+                            <span class="n">am</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">attributes</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">group</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">h5path</span><span class="p">)</span>
+                        <span class="n">am</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">attributes</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write_attr</span><span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># print(nxpath, str(e))</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;No node [&quot;</span><span class="p">):</span>
+                    <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_groupfield</span><span class="p">(</span>
+                        <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s2">&quot;NXSFile::write_snapshot_item() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                    <span class="k">raise</span>
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="n">NOATTRS</span>
+            <span class="n">am</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attributes</span>
+            <span class="k">for</span> <span class="n">anm</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">avl</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="n">anm</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">av</span> <span class="o">=</span> <span class="n">avl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">av</span><span class="p">):</span>
+                        <span class="n">av</span> <span class="o">=</span> <span class="n">av</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">av</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>
+                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">avl</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="n">nanm</span> <span class="o">=</span> <span class="n">ATTRDESC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">anm</span><span class="p">,</span> <span class="n">anm</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write_attr</span><span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s2">&quot;NXSFile::write_snapshot_item() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="NXSFile.close"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; close file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cursors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span> <span class="o">=</span> <span class="p">{}</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2026 DESY, Jan Kotanski &lt;jkotan@mail.desy.de&gt;
+
+GNU GENERAL PUBLIC LICENSE, version 3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+title: NXSBlissWriter
+email: jan.kotanski@desy.de
+description: "NXSBlissWriter"
+include: [ '_sources', '_modules', '_static']
