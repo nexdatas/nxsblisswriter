@@ -802,11 +802,11 @@ ds.result = pilatus.mxparameters_cb(commonblock, ds.pilatus_mxparameters, "pilat
         </group>
     </group>
     <group type="NXdata" name="data">
-      <link target="/scan:NXentry/NXinstrument/collection/p09_lavuecontroller_01_detectordistance" name="p09_lavuecontroller_01_detectordistance"/>
-    <link target="/scan:NXentry/NXinstrument/collection/point_nb" name="point_nb"/>
-    <link target="/scan:NXentry/NXinstrument/collection/exp_dmy01" name="exp_dmy01"/>
-    <link target="/scan:NXentry/NXinstrument/collection/exp_t01" name="exp_t01"/>
-    <link target="/scan:NXentry/NXinstrument/collection/timestamp" name="timestamp"/>
+      <link target="/scan:NXentry/instrument:NXinstrument/collection/p09_lavuecontroller_01_detectordistance" name="p09_lavuecontroller_01_detectordistance"/>
+    <link target="/scan:NXentry/instrument:NXinstrument/collection/point_nb" name="point_nb"/>
+    <link target="/scan:NXentry/instrument:NXinstrument/collection/exp_dmy01" name="exp_dmy01"/>
+    <link target="/scan:NXentry/instrument:NXinstrument/collection/exp_t01" name="exp_t01"/>
+    <link target="/scan:NXentry/instrument:NXinstrument/collection/timestamp" name="timestamp"/>
     <link target="scan/instrument/pilatus/data" name="pilatus"/>
     <link target="/scan:NXentry/instrument:NXinstrument/collection:NXcollection/exp_c02" name="exp_c02"/><link target="/scan:NXentry/instrument:NXinstrument/collection:NXcollection/exp_dmy03" name="exp_dmy03"/><link target="/scan:NXentry/instrument:NXinstrument/collection:NXcollection/exp_c01" name="exp_c01"/><link target="/scan:NXentry/sample:NXsample/uniax:NXenvironment/T:NXsensor/value_log:NXlog/value" name="uniax_t"/><link target="/scan:NXentry/sample:NXsample/uniax:NXenvironment/T:NXsensor/value_log:NXlog/time" name="uniax_t_time"/><link target="/scan:NXentry/sample:NXsample/mlz_stressihtf2_v2:NXenvironment/T:NXsensor/value_log:NXlog/value" name="mlz_stressihtf2_v2_t"/><link target="/scan:NXentry/sample:NXsample/mlz_stressihtf2_v2:NXenvironment/T:NXsensor/value_log:NXlog/time" name="mlz_stressihtf2_v2_t_time"/><link target="/scan:NXentry/sample_environment:NXsample/uniax:NXenvironment/force:NXsensor/value_log:NXlog/value" name="uniax_force"/><link target="/scan:NXentry/sample_environment:NXsample/uniax:NXenvironment/force:NXsensor/value_log:NXlog/time" name="uniax_force_time"/><link target="/scan:NXentry/sample_environment:NXsample/mlz_stressihtf2_v2:NXenvironment/water_ok:NXsensor/value_log:NXlog/value" name="mlz_stressihtf2_v2_water_ok"/><link target="/scan:NXentry/sample_environment:NXsample/mlz_stressihtf2_v2:NXenvironment/water_ok:NXsensor/value_log:NXlog/time" name="mlz_stressihtf2_v2_water_ok_time"/></group>
   <field type="NX_CHAR" name="experiment_identifier">
