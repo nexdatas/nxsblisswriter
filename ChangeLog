@@ -1,4 +1,8 @@
 2026-03-03 Jan Kotanski <jankotan@gmail.com>
+	* fix for error messages (#32)
+	* tagged as v0.1.1
+
+2026-03-03 Jan Kotanski <jankotan@gmail.com>
 	* sleep during waiting for scan state (#32)
 	* tagged as v0.1.0
 
