@@ -289,9 +289,13 @@ class NXSFile:
                             root, lnxpath, dtype, value=None,
                             shape=shape, chunk=chunk)
                         dataset = self.__nxfields[key]
+                    elif str(e).startswith("Node ["):
+                        self._streams.warn(
+                            "NXSFile::prepareChannels() - %s" % (str(e)))
+
                     else:
                         self._streams.error(
-                            "NXSFile::prepareChannels() - " % (str(e)))
+                            "NXSFile::prepareChannels() - %s" % (str(e)))
                         raise
                 item = ch
                 if dataset is not None:
@@ -382,6 +386,7 @@ class NXSFile:
             self._streams.info(
                 "NXSFile::write_scan_point() - "
                 "End of stream for all columns: %s" % (str(eos)))
+            # if eose is not None:
             raise eose
 
     def write_final_snapshot(self):
