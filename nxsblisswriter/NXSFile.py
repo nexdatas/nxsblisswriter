@@ -392,8 +392,10 @@ class NXSFile:
             self._streams.info(
                 "NXSFile::write_scan_point() - "
                 "End of stream for all columns: %s" % (str(eos)))
-            # if eose is not None:
-            raise eose
+            if eose is not None:
+                raise eose
+            else:
+                raise EndOfStream("No active channels")
 
     def write_final_snapshot(self):
         """ write final data
