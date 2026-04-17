@@ -1,3 +1,7 @@
+2026-04-17 Jan Kotanski <jankotan@gmail.com>
+	* create vds for lima stream (#37)
+	* tagged as v0.2.0
+
 2026-03-03 Jan Kotanski <jankotan@gmail.com>
 	* fix for error messages (#32)
 	* tagged as v0.1.1

@@ -177,6 +177,8 @@ class NXSFile:
         self.__nxfields = {}
         self.__last_write_time = 0
         self.__max_write_interval = max_write_interval
+        self.__vds = {}
+        self.__vds_plugins = ["lima"]
 
     @functools.cached_property
     def channels(self):
@@ -285,10 +287,14 @@ class NXSFile:
                 except Exception as e:
                     if str(e).startswith("No node ["):
                         # print("S", key, shape, chunk, stream.dtype, ch)
-                        self.__nxfields[key] = self.create_groupfield(
-                            root, lnxpath, dtype, value=None,
-                            shape=shape, chunk=chunk)
-                        dataset = self.__nxfields[key]
+                        if stream.plugin in self.__vds_plugins:
+                            self.__vds[key] = {
+                                "nxpath": lnxpath, "dtype": dtype}
+                        else:
+                            self.__nxfields[key] = self.create_groupfield(
+                                root, lnxpath, dtype, value=None,
+                                shape=shape, chunk=chunk)
+                            dataset = self.__nxfields[key]
                     elif str(e).startswith("Node ["):
                         self._streams.warn(
                             "NXSFile::prepareChannels() - %s" % (str(e)))
@@ -418,6 +424,31 @@ class NXSFile:
             else:
                 continue
             break
+        if "datadesc" not in si:
+            return
+        ddesc = si["datadesc"]
+        # self._streams.info("CREATE VDS %s" % (self.__vds))
+
+        for key, vl in self.__vds.items():
+            if key not in ddesc:
+                continue
+            desc = ddesc[key]
+            # self._streams.info("CREATE DESC %s" % (desc))
+            nxpath = vl["nxpath"]
+            dtype = vl["dtype"]
+            stream = self.__scan.streams[key]
+            if "__vmaps_shape__" in desc:
+                shape = desc["__vmaps_shape__"]
+            else:
+                shape = [len(stream)] + list(stream.shape)
+            vmaps = []
+            if "__vmaps__" in desc:
+                vmaps = desc["__vmaps__"]
+            root = self.__mfile.root()
+            # self._streams.info(
+            #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))
+            self.__nxfields[key] = self.create_groupvds(
+                root, nxpath, dtype, shape, vmaps)
 
     def create_field(self, grp, name, dtype,
                      value=None, shape=None, chunk=None):
@@ -501,6 +532,110 @@ class NXSFile:
             value = np.array(value, dtype=dtype)
         # print("CREATE %s (%s)" % (nxpath, dtype))
         dataset = self.create_field(grp, name, dtype, value, shape, chunk)
+        return dataset
+
+    def add_vmap(self, vfl, vmap):
+        """ create field
+
+        :param n: group name
+        :type n: :obj:`str`
+        :param type_code: nexus field type
+        :type type_code: :obj:`str`
+        :param shape: shape
+        :type shape: :obj:`list` < :obj:`int` >
+        :returns: file tree field
+        :rtype: :class:`H5CppField`
+        """
+        lview = vmap["view"]
+        fname = vmap["filename"]
+        eview = vmap["sourceview"]
+        path = vmap["path"]
+        sds = eview["dataspace"]
+        lds = lview["dataspace"]
+        shape = lds["shape"]
+        eshape = sds["shape"]
+        h5_lds = h5cpp.dataspace.Simple(tuple(shape))
+        h5_sds = h5cpp.dataspace.Simple(tuple(eshape))
+
+        if "selection" in lview:
+            selection = lview["selection"]
+            h5_selection = h5cpp.dataspace.Hyperslab(**selection)
+            h5_lview = h5cpp.dataspace.View(h5_lds, h5_selection)
+        else:
+            h5_lview = h5cpp.dataspace.View(h5_lds)
+
+        if "selection" in eview:
+            usel = eview["selection"]
+            h5_usel = h5cpp.dataspace.Hyperslab(**usel)
+            h5_eview = h5cpp.dataspace.View(h5_sds, h5_usel)
+        else:
+            h5_eview = h5cpp.dataspace.View(h5_sds)
+
+        # self._streams.info("ADD %s %s " % (fname, path))
+        vfl.add(h5cpp.property.VirtualDataMap(
+            h5_lview, str(fname), h5cpp.Path(path), h5_eview))
+
+    def create_vds(self, grp, name, dtype, shape, vmaps, fillvalue=0):
+        """ create field
+
+        :param n: group name
+        :type n: :obj:`str`
+        :param type_code: nexus field type
+        :type type_code: :obj:`str`
+        :param shape: shape
+        :type shape: :obj:`list` < :obj:`int` >
+        :returns: file tree field
+        :rtype: :class:`H5CppField`
+        """
+        # self._streams.info(
+        #    "CREATE %s %s %s %s " % (name, dtype, shape, vmaps))
+
+        vfl = h5cpp.property.VirtualDataMaps()
+        for vmap in vmaps:
+            self.add_vmap(vfl, vmap)
+        dcpl = h5cpp.property.DatasetCreationList()
+        dcpl.set_fill_value(fillvalue, PTH[dtype])
+        dataspace = h5cpp.dataspace.Simple(
+            tuple(shape),
+            tuple([h5cpp.dataspace.UNLIMITED] * len(shape)))
+        vf = h5cpp.node.VirtualDataset(
+            grp, h5cpp.Path(name), PTH[dtype], dataspace, vfl, dcpl=dcpl)
+
+        return vf
+
+    def create_groupvds(self, root, lnxpath, dtype, shape, vmaps):
+        """ create field
+
+        :param root: root object
+        :type root: :class:`nxgroup`
+        :param lnxpath: nexus path list
+        :type lnxpath: :obj:`list` <:obj:`str`>
+        :param dtype: nexus field type
+        :type dtype: :obj:`str`
+        :param shape: shape
+        :type shape: :obj:`list` < :obj:`int` >
+        :returns: nexus field
+        :rtype: :class:`nxfield`
+        """
+        grp = root
+        for gr in lnxpath[:-1]:
+            gn = gr
+            gt = None
+            if ":" in gr:
+                gn, gt = gr.split(":")
+
+            if grp.has_group(gn):
+                grp = grp.get_group(gn)
+            else:
+                grp = h5cpp.node.Group(grp, gn)
+                if gt is not None:
+                    grp.attributes.create(
+                        "NX_class",
+                        h5cpp.datatype.kVariableString).write(gt)
+            # print(gn)
+        name = lnxpath[-1]
+        # print("CREATE %s (%s)" % (nxpath, dtype))
+        dataset = self.create_vds(grp, name, dtype, shape, vmaps)
         return dataset
 
     def write_attr(self, am, name, dtype, value, item=None):
