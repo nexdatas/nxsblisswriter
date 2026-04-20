@@ -448,13 +448,26 @@ class NXSFile:
             if "__vmaps__" in desc:
                 vmaps = desc["__vmaps__"]
             elif stream.info["format"] in ["lima_v1"]:
-                linfo = stream.info.lima_info
+                linfo = stream.info["lima_info"]
                 fp = linfo["file_path"]
                 fn = self.__fpath
                 common_prefix = os.path.commonprefix(
                     [os.path.split(fn)[0], fp])
                 file_pattern = os.path.relpath(fp, common_prefix)
-                vmaps = self.generate_vmaps(shape, file_pattern, **linfo)
+                frame_per_acquisition = linfo["frame_per_acquisition"]
+                # acquisition_offset = linfo["acquisition_offset"]
+                file_offset = linfo["file_offset"]
+                file_format = linfo["file_format"]
+                data_path = linfo["data_path"]
+                frame_per_file = linfo["frame_per_file"]
+                vmaps = self.generate_vmaps(
+                    shape,
+                    frame_per_acquisition,
+                    file_offset,
+                    file_format,
+                    file_pattern,
+                    data_path,
+                    frame_per_file)
             root = self.__mfile.root()
             # self._streams.info(
             #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))
@@ -586,11 +599,9 @@ class NXSFile:
         vfl.add(h5cpp.property.VirtualDataMap(
             h5_lview, str(fname), h5cpp.Path(path), h5_eview))
 
-    def generate_vmaps(self, shape, file_pattern,
-                       frame_per_acquisition=None,
-                       acquisition_offset=0,
-                       file_offset=0, file_format=None, file_path=None,
-                       data_path=None, frame_per_file=1000):
+    def generate_vmaps(self, shape, frame_per_acquisition,
+                       file_offset, file_format, file_pattern,
+                       data_path, frame_per_file):
 
         vmaps = []
         if file_format not in ["hdf5"] or not frame_per_acquisition \
@@ -602,10 +613,12 @@ class NXSFile:
             frame_per_acquisition, frame_per_file)
         remaining_acq_files_nb, remaining_last_file_scan_frame_nb = divmod(
             remaining_scan_frame_nb, frame_per_file)
-        acq_frames = [frame_per_file] * acq_files_nb \
-            + [last_file_scan_frame_nb]
-        remaining_frames = [frame_per_file] * remaining_acq_files_nb \
-            + [remaining_last_file_scan_frame_nb]
+        acq_frames = [frame_per_file] * acq_files_nb
+        if last_file_scan_frame_nb:
+            acq_frames += [last_file_scan_frame_nb]
+        remaining_frames = [frame_per_file] * remaining_acq_files_nb
+        if remaining_last_file_scan_frame_nb:
+            remaining_frames += [remaining_last_file_scan_frame_nb]
         frame_nb = []
         for acq in range(acq_nb):
             frame_nb.extend(acq_frames)
@@ -620,13 +633,14 @@ class NXSFile:
                 fname = file_pattern
             vmap["class"] = "VirtualDataMap"
             vmap["filename"] = fname
-            vmap["path"] = file_path
+            vmap["path"] = data_path
             vshape = shape[:]
             vshape[0] = nb
             offset = [0] * len(shape)
             offset[0] = off
             vmap["view"] = {"class": "View",
-                            "dataspace": {"shape": vshape},
+                            "dataspace": {"class": "Simple",
+                                          "shape": vshape},
                             "selection": {"block": vshape,
                                           "offset": offset,
                                           "stride": vshape,
@@ -634,8 +648,11 @@ class NXSFile:
                                           }
                             }
             vmap["sourceview"] = {"class": "View",
-                                  "dataspace": {"shape": vshape}}
+                                  "dataspace": {"class": "Simple",
+                                                "shape": vshape}}
             off += nb
+            vmaps.append(vmap)
+        return vmaps
 
     def create_vds(self, grp, name, dtype, shape, vmaps, fillvalue=0):
         """ create field
