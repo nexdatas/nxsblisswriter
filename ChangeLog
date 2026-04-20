@@ -1,3 +1,8 @@
+2026-04-21 Jan Kotanski <jankotan@gmail.com>
+	* add support for vds attributes (#44)
+	* add Errors attribute (#44)
+	* tagged as v0.4.0
+
 2026-04-20 Jan Kotanski <jankotan@gmail.com>
 	* generate vmaps when __vmaps___ not provided (#41)
 	* tagged as v0.3.0

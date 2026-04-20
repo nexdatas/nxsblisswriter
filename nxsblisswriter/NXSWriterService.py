@@ -21,6 +21,7 @@
 
 import weakref
 import time
+import threading
 
 from blissdata.redis_engine.store import DataStore
 from blissdata.redis_engine.scan import ScanState
@@ -56,6 +57,8 @@ class NXSWriterService:
         self._streams = StreamSet(weakref.ref(server) if server else None)
         #: (:obj:`bool`) service running flag
         self.__running = False
+        #: (:obj:`bool`) service error flag
+        self.__error = False
         #: (:obj:`int`) scan timeout in seconds
         self.__next_scan_timeout = next_scan_timeout
         #: (:obj:`str`) default nexus path
@@ -66,34 +69,56 @@ class NXSWriterService:
         self.__point_sleep_time = point_sleep_time
         #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
         self.__datastore = DataStore(redis_url)
+        #: (:obj:`list`<:obj:`str`>) error list
+        self.__errors = []
+        #: (:class:`threading.Lock`) threading lock
+        self.__error_lock = threading.Lock()
 
     def start(self):
         """ start writer service
         """
         self.__running = True
+        self.__error = False
         timestamp = None
+        self.__errors = []
 
         while self.__running:
             try:
-                timestamp, key = self.__datastore.get_next_scan(
-                    since=timestamp, timeout=self.__next_scan_timeout
-                )
-            except NoScanAvailable:
-                continue
-            scan = self.__datastore.load_scan(key)
-            if self.__session in ["__all__", scan.session]:
-                self.write_scan(scan)
+                try:
+                    timestamp, key = self.__datastore.get_next_scan(
+                        since=timestamp, timeout=self.__next_scan_timeout
+                    )
+                except NoScanAvailable:
+                    continue
+                scan = self.__datastore.load_scan(key)
+                if self.__session in ["__all__", scan.session]:
+                    self.write_scan(scan)
+            except Exception as e:
+                self.__error = True
+                with self.__error_lock:
+                    self.__errors.append(str(e))
 
     def get_status(self):
         """ get writer service status
         """
-        status = "is RUNNING" if self.__running else "is STOPPED"
-        return "NXSWriter %s" % status
+        if self.__error:
+            status = "is FAILED"
+        else:
+            status = "is RUNNING" if self.__running else "is STOPPED"
+        return "NXSBlissWriter %s" % status
 
     def stop(self):
         """ stop writer service
         """
         self.__running = False
+
+    def errors(self):
+        """ list of errors
+        """
+        errors = []
+        with self.__error_lock:
+            errors = self.__errors[:]
+        return errors
 
     def write_scan(self, scan):
         """ write scan data

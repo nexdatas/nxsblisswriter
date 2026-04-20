@@ -78,7 +78,8 @@ ATTRDESC = {
 }
 
 
-NOATTRS = {"name", "label", "dtype", "value", "nexus_path", "shape", "stream"}
+NOATTRS = {"name", "label", "dtype", "value", "nexus_path",
+           "shape", "stream", "__vmaps__", "__vmaps_shape__"}
 
 
 def first(array):
@@ -183,10 +184,20 @@ class NXSFile:
 
     @functools.cached_property
     def channels(self):
+        """ returns a list of channels with description
+
+        :returns: list of channels descriptions
+        :rtype: :obj:`list` <:obj: `dict` >
+        """
         return tuple(ch for ch in self.__scan.info["datadesc"].values())
 
     @functools.cached_property
     def labels(self):
+        """ returns a list of channels with description
+
+        :returns: list of channel labels
+        :rtype: :obj:`list` <:obj: `str` >
+        """
         labels = (ch["label"] for ch in self.channels)
         return tuple(label.replace(" ", "_") for label in labels)
 
@@ -304,29 +315,38 @@ class NXSFile:
                         self._streams.error(
                             "NXSFile::prepareChannels() - %s" % (str(e)))
                         raise
-                item = ch
-                if dataset is not None:
-                    attrs = set(item.keys()) - NOATTRS
-                    am = dataset.attributes
-                    for anm in attrs:
-                        avl = item[anm]
-                        if isinstance(avl, list):
-                            av = avl[0]
-                            while isinstance(av, list) and len(av):
-                                av = av[0]
-                            dtp = str(type(av).__name__)
-                        elif hasattr(avl, "dtype"):
-                            dtp = str(dtype.__name__)
-                        else:
-                            dtp = str(type(avl).__name__)
-                        nanm = ATTRDESC.get(anm, anm)
-                        try:
-                            self.write_attr(am, nanm, dtp, avl, item)
-                        except Exception as e:
-                            self._streams.error(
-                                "NXSFile::prepareChannels() "
-                                "- %s %s %s %s %s %s"
-                                % (am, nanm, dtp, avl, item, str(e)))
+                self.add_attributes(dataset, ch)
+
+    def add_attributes(self, dataset, item):
+        """ add dataset attribute
+
+        :param dataset: h5cpp dataset
+        :type dataset: :class:`pninexus.h5cpp.node.Dataset`
+        :param item: channel descrition
+        :type item: :obj:`dict` <:obj:`str`, `any`>
+        """
+        if dataset is not None:
+            attrs = set(item.keys()) - NOATTRS
+            am = dataset.attributes
+            for anm in attrs:
+                avl = item[anm]
+                if isinstance(avl, list):
+                    av = avl[0]
+                    while isinstance(av, list) and len(av):
+                        av = av[0]
+                    dtp = str(type(av).__name__)
+                elif hasattr(avl, "dtype"):
+                    dtp = str(avl.dtype.__name__)
+                else:
+                    dtp = str(type(avl).__name__)
+                nanm = ATTRDESC.get(anm, anm)
+                try:
+                    self.write_attr(am, nanm, dtp, avl, item)
+                except Exception as e:
+                    self._streams.error(
+                        "NXSFile::prepareChannels() "
+                        "- %s %s %s %s %s %s"
+                        % (am, nanm, dtp, avl, item, str(e)))
 
     def write_scan_points(self):
         """ write step data
@@ -473,23 +493,25 @@ class NXSFile:
             #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))
             self.__nxfields[key] = self.create_groupvds(
                 root, nxpath, dtype, shape, vmaps)
+            ch = ddesc.values()
+            self.add_attributes(self.__nxfields[key], ch)
 
     def create_field(self, grp, name, dtype,
                      value=None, shape=None, chunk=None):
         """ create field
 
-        :param n: group name
-        :type n: :obj:`str`
-        :param type_code: nexus field type
-        :type type_code: :obj:`str`
+        :param grp: nexus group
+        :type grp: :class:`pninexus.h5cpp.node.Group`
+        :param name: group name
+        :type name: :obj:`str`
+        :param dtype: nexus field type
+        :type dtype: :obj:`str`
         :param shape: shape
         :type shape: :obj:`list` < :obj:`int` >
         :param chunk: chunk
         :type chunk: :obj:`list` < :obj:`int` >
-        :param dfilter: filter deflater
-        :type dfilter: :class:`H5CppDataFilter`
         :returns: file tree field
-        :rtype: :class:`H5CppField`
+        :rtype: :class:`pninexus.h5cpp.node.Dataset`
         """
         # print("CREATE", name, dtype, value, shape, chunk)
         dcpl = h5cpp.property.DatasetCreationList()
@@ -521,7 +543,7 @@ class NXSFile:
         """ create field
 
         :param root: root object
-        :type root: :class:`nxgroup`
+        :type root: :class:`pninexus.h5cpp.node.Group`
         :param lnxpath: nexus path list
         :type lnxpath: :obj:`list` <:obj:`str`>
         :param dtype: nexus field type
@@ -533,7 +555,7 @@ class NXSFile:
         :param chunk: chunk
         :type chunk: :obj:`list` < :obj:`int` >
         :returns: nexus field
-        :rtype: :class:`nxfield`
+        :rtype: :class:`pninexus.h5cpp.node.Dataset`
         """
         grp = root
         for gr in lnxpath[:-1]:
@@ -568,7 +590,7 @@ class NXSFile:
         :param shape: shape
         :type shape: :obj:`list` < :obj:`int` >
         :returns: file tree field
-        :rtype: :class:`H5CppField`
+        :rtype: :class:`pninexus.h5cpp.node.Dataset`
         """
         lview = vmap["view"]
         fname = vmap["filename"]
@@ -602,7 +624,25 @@ class NXSFile:
     def generate_vmaps(self, shape, frame_per_acquisition,
                        file_offset, file_format, file_pattern,
                        data_path, frame_per_file):
+        """ generate virtual map list
 
+        :param shape: shape
+        :type shape: :obj:`list` < :obj:`int` >
+        :param frame_per_acquisition: frame per acquisition
+        :type frame_per_acquisition: :obj:`int`
+        :param file_offset: file offset
+        :type file_offset: :obj:`int`
+        :param file_format: file format
+        :type file_format: :obj:`str`
+        :param file_pattern: file pattern
+        :type file_pattern: :obj:`str`
+        :param data_path: nexus data path
+        :type data_path: :obj:`str`
+        :param frame_per_file: frame per file
+        :type frame_per_file: :obj:`int`
+        :returns: virtual map list
+        :rtype: :obj:`list` <:obj:`dict`>
+        """
         vmaps = []
         if file_format not in ["hdf5"] or not frame_per_acquisition \
            or not data_path or not frame_per_file:
@@ -663,8 +703,12 @@ class NXSFile:
         :type type_code: :obj:`str`
         :param shape: shape
         :type shape: :obj:`list` < :obj:`int` >
+        :param vmaps: virtual map list
+        :type: :obj:`list` <:obj:`dict`>
+        :param fillvalue: vds file value
+        :type fillvalue: :any:
         :returns: file tree field
-        :rtype: :class:`H5CppField`
+        :rtype: :class:`pninexus.h5cpp.node.Dataset`
         """
         # self._streams.info(
         #    "CREATE %s %s %s %s " % (name, dtype, shape, vmaps))
@@ -694,7 +738,7 @@ class NXSFile:
         :param shape: shape
         :type shape: :obj:`list` < :obj:`int` >
         :returns: nexus field
-        :rtype: :class:`nxfield`
+        :rtype: :class:`pninexus.h5cpp.node.Dataset`
         """
         grp = root
         for gr in lnxpath[:-1]:
@@ -719,6 +763,17 @@ class NXSFile:
 
     def write_attr(self, am, name, dtype, value, item=None):
         """ write attribute
+
+        :param am: attribute manager
+        :type am: :class:`pninexus.h5cpp.attribute.AttributeManager`
+        :param name: attribute name
+        :type name: :obj:`str`
+        :param name: attribute type
+        :type name: :obj:`str`
+        :param name: attribute value
+        :type name: :any:
+        :param item: element description
+        :type item: :obj:`dict`
         """
 
         try:
@@ -792,6 +847,13 @@ class NXSFile:
 
     def write_snapshot_item(self, root, item, default_nexus_path=None):
         """ write snapshot item
+
+        :param root: nexus root group
+        :type root: :class:`pninexus.h5cpp.node.Group`
+        :param item: element description
+        :type item: :obj:`dict`
+        :param default_nexus_path: default nexus path
+        :type default_nexus_path: :obj:`str`
         """
         nxpath = item.get('nexus_path', default_nexus_path)
         value = item.get('value', None)
@@ -838,27 +900,7 @@ class NXSFile:
                         "NXSFile::write_snapshot_item() - %s %s %s %s"
                         % (am, dtype, PTH[str(dtype)], str(e)))
                     raise
-        if dataset is not None:
-            attrs = set(item.keys()) - NOATTRS
-            am = dataset.attributes
-            for anm in attrs:
-                avl = item[anm]
-                if isinstance(avl, list):
-                    av = avl[0]
-                    while isinstance(av, list) and len(av):
-                        av = av[0]
-                    dtp = str(type(av).__name__)
-                elif hasattr(avl, "dtype"):
-                    dtp = str(dtype.__name__)
-                else:
-                    dtp = str(type(avl).__name__)
-                nanm = ATTRDESC.get(anm, anm)
-                try:
-                    self.write_attr(am, nanm, dtp, avl, item)
-                except Exception as e:
-                    self._streams.error(
-                        "NXSFile::write_snapshot_item() - %s %s %s %s %s %s"
-                        % (am, nanm, dtp, avl, item, str(e)))
+        self.add_attributes(dataset, item)
 
     def close(self):
         """ close file
