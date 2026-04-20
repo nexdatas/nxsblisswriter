@@ -1,3 +1,7 @@
+2026-04-20 Jan Kotanski <jankotan@gmail.com>
+	* generate vmaps when __vmaps___ not provided (#41)
+	* tagged as v0.3.0
+
 2026-04-17 Jan Kotanski <jankotan@gmail.com>
 	* create vds for lima stream (#37)
 	* tagged as v0.2.0

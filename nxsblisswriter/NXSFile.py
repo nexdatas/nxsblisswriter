@@ -28,6 +28,7 @@ from lxml.etree import XMLParser
 from lxml import etree
 import numpy as np
 import json
+import os
 
 # from blissdata.redis_engine.store import DataStore
 # from blissdata.redis_engine.scan import ScanState
@@ -446,6 +447,27 @@ class NXSFile:
             vmaps = []
             if "__vmaps__" in desc:
                 vmaps = desc["__vmaps__"]
+            elif stream.info["format"] in ["lima_v1"]:
+                linfo = stream.info["lima_info"]
+                fp = linfo["file_path"]
+                fn = self.__fpath
+                common_prefix = os.path.commonprefix(
+                    [os.path.split(fn)[0], fp])
+                file_pattern = os.path.relpath(fp, common_prefix)
+                frame_per_acquisition = linfo["frame_per_acquisition"]
+                # acquisition_offset = linfo["acquisition_offset"]
+                file_offset = linfo["file_offset"]
+                file_format = linfo["file_format"]
+                data_path = linfo["data_path"]
+                frame_per_file = linfo["frame_per_file"]
+                vmaps = self.generate_vmaps(
+                    shape,
+                    frame_per_acquisition,
+                    file_offset,
+                    file_format,
+                    file_pattern,
+                    data_path,
+                    frame_per_file)
             root = self.__mfile.root()
             # self._streams.info(
             #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))
@@ -576,6 +598,61 @@ class NXSFile:
         # self._streams.info("ADD %s %s " % (fname, path))
         vfl.add(h5cpp.property.VirtualDataMap(
             h5_lview, str(fname), h5cpp.Path(path), h5_eview))
+
+    def generate_vmaps(self, shape, frame_per_acquisition,
+                       file_offset, file_format, file_pattern,
+                       data_path, frame_per_file):
+
+        vmaps = []
+        if file_format not in ["hdf5"] or not frame_per_acquisition \
+           or not data_path or not frame_per_file:
+            return vmaps
+        length = shape[0]
+        acq_nb, remaining_scan_frame_nb = divmod(length, frame_per_acquisition)
+        acq_files_nb, last_file_scan_frame_nb = divmod(
+            frame_per_acquisition, frame_per_file)
+        remaining_acq_files_nb, remaining_last_file_scan_frame_nb = divmod(
+            remaining_scan_frame_nb, frame_per_file)
+        acq_frames = [frame_per_file] * acq_files_nb
+        if last_file_scan_frame_nb:
+            acq_frames += [last_file_scan_frame_nb]
+        remaining_frames = [frame_per_file] * remaining_acq_files_nb
+        if remaining_last_file_scan_frame_nb:
+            remaining_frames += [remaining_last_file_scan_frame_nb]
+        frame_nb = []
+        for acq in range(acq_nb):
+            frame_nb.extend(acq_frames)
+        frame_nb.extend(remaining_frames)
+        off = 0
+        for nid, nb in enumerate(frame_nb):
+            vmap = {}
+            fid = file_offset + nid
+            try:
+                fname = file_pattern % fid
+            except Exception:
+                fname = file_pattern
+            vmap["class"] = "VirtualDataMap"
+            vmap["filename"] = fname
+            vmap["path"] = data_path
+            vshape = shape[:]
+            vshape[0] = nb
+            offset = [0] * len(shape)
+            offset[0] = off
+            vmap["view"] = {"class": "View",
+                            "dataspace": {"class": "Simple",
+                                          "shape": vshape},
+                            "selection": {"block": vshape,
+                                          "offset": offset,
+                                          "stride": vshape,
+                                          "count": [1] * len(vshape)
+                                          }
+                            }
+            vmap["sourceview"] = {"class": "View",
+                                  "dataspace": {"class": "Simple",
+                                                "shape": vshape}}
+            off += nb
+            vmaps.append(vmap)
+        return vmaps
 
     def create_vds(self, grp, name, dtype, shape, vmaps, fillvalue=0):
         """ create field
