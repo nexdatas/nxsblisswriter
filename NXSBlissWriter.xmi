@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <pogoDsl:PogoSystem xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pogoDsl="http://tango.org/pogo/PogoDsl">
   <classes name="NXSBlissWriter" pogoRevision="9.9">
-    <description description="NeXus Bliss Writer stores (meta)data from blissdata provided by NXSDataWriter" title="NeXus Bliss Writer" sourcePath="/home/jkotan/ndts/nexdatas.nxsblisswriter" language="PythonHL" filestogenerate="XMI   file,Code files,html Pages" license="GPL" copyright="" hasMandatoryProperty="false" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false" descriptionHtmlExists="false">
+    <description description="NeXus Bliss Writer stores (meta)data from blissdata provided by NXSDataWriter" title="NeXus Bliss Writer" sourcePath="/home/jkotan/ndts/nxsblisswriter" language="PythonHL" filestogenerate="XMI   file,Code files,html Pages" license="GPL" copyright="" hasMandatoryProperty="false" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false" descriptionHtmlExists="false">
       <inheritances classname="Device_Impl" sourcePath=""/>
       <identification contact="at desy.de - jan.kotanski" author="jan.kotanski" emailDomain="desy.de" classFamily="Acquisition" siteSpecific="" platform="All Platforms" bus="Not Applicable" manufacturer="" reference=""/>
     </description>
@@ -65,6 +65,14 @@
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
     </commands>
+    <attributes name="Errors" attType="Spectrum" rwType="READ" displayLevel="OPERATOR" polledPeriod="0" maxX="1024" maxY="" allocReadMember="true" isDynamic="false">
+      <dataType xsi:type="pogoDsl:StringType"/>
+      <changeEvent fire="false" libCheckCriteria="false"/>
+      <archiveEvent fire="false" libCheckCriteria="false"/>
+      <dataReadyEvent fire="false" libCheckCriteria="true"/>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+      <properties description="list of errors" label="errors" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
+    </attributes>
     <preferences docHome="./doc_html" makefileHome="$(TANGO_DIR)/Libraries/cppserver/common"/>
   </classes>
 </pogoDsl:PogoSystem>

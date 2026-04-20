@@ -19,6 +19,7 @@ from tango import DebugIt, DevState
 from tango.server import Device
 # from tango.server import DevStatus
 from tango.server import command
+from tango.server import attribute
 from tango.server import device_property
 
 from .NXSWriterService import NXSWriterService as NWS
@@ -85,6 +86,17 @@ class NXSBlissWriter(Device):
         doc="sleep time between write_point command calls"
     )
 
+    # ----------
+    # Attributes
+    # ----------
+
+    Errors = attribute(
+        dtype=('DevString', ),
+        max_dim_x=1024,
+        label="errors",
+        doc="list of errors",
+    )
+
     # ---------------
     # General methods
     # ---------------
@@ -103,6 +115,13 @@ class NXSBlissWriter(Device):
 
     def dev_status(self):
         return self.nxs_writer_service.get_status()
+
+    # ------------------
+    # Attributes methods
+    # ------------------
+
+    def read_Errors(self):
+        return self.nxs_writer_service.errors()
 
     # --------
     # Commands
