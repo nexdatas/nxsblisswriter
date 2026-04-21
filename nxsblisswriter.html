@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>nxsblisswriter package &#8212; NXSBlissWriter 0.1.0 documentation</title>
+    <title>nxsblisswriter package &#8212; NXSBlissWriter 0.4.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -39,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           NXSBlissWriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -81,11 +81,16 @@
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-nxsblisswriter.NXSFile">nxsblisswriter.NXSFile module</a><ul>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile"><code class="docutils literal notranslate"><span class="pre">NXSFile</span></code></a><ul>
+<li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.add_attributes"><code class="docutils literal notranslate"><span class="pre">NXSFile.add_attributes()</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.add_vmap"><code class="docutils literal notranslate"><span class="pre">NXSFile.add_vmap()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.channels"><code class="docutils literal notranslate"><span class="pre">NXSFile.channels</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.close"><code class="docutils literal notranslate"><span class="pre">NXSFile.close()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.create_field"><code class="docutils literal notranslate"><span class="pre">NXSFile.create_field()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.create_file_structure"><code class="docutils literal notranslate"><span class="pre">NXSFile.create_file_structure()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.create_groupfield"><code class="docutils literal notranslate"><span class="pre">NXSFile.create_groupfield()</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.create_groupvds"><code class="docutils literal notranslate"><span class="pre">NXSFile.create_groupvds()</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.create_vds"><code class="docutils literal notranslate"><span class="pre">NXSFile.create_vds()</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.generate_vmaps"><code class="docutils literal notranslate"><span class="pre">NXSFile.generate_vmaps()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.labels"><code class="docutils literal notranslate"><span class="pre">NXSFile.labels</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.prepareChannels"><code class="docutils literal notranslate"><span class="pre">NXSFile.prepareChannels()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.write_attr"><code class="docutils literal notranslate"><span class="pre">NXSFile.write_attr()</span></code></a></li>
@@ -103,6 +108,7 @@
 <li><a class="reference internal" href="#module-nxsblisswriter.NXSBlissWriter">nxsblisswriter.NXSBlissWriter module</a><ul>
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter</span></code></a><ul>
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.DefaultNeXusPath"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.DefaultNeXusPath</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.Errors"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.Errors</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.NextScanTimeout"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.NextScanTimeout</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.PointSleepTime"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.PointSleepTime</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.RedisUrl"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.RedisUrl</span></code></a></li>
@@ -114,12 +120,14 @@
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.delete_device"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.delete_device()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.dev_status"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.dev_status()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.init_device"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.init_device()</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.read_Errors"><code class="docutils literal notranslate"><span class="pre">NXSBlissWriter.read_Errors()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-nxsblisswriter.NXSWriterService">nxsblisswriter.NXSWriterService module</a><ul>
 <li><a class="reference internal" href="#nxsblisswriter.NXSWriterService.NXSWriterService"><code class="docutils literal notranslate"><span class="pre">NXSWriterService</span></code></a><ul>
+<li><a class="reference internal" href="#nxsblisswriter.NXSWriterService.NXSWriterService.errors"><code class="docutils literal notranslate"><span class="pre">NXSWriterService.errors()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSWriterService.NXSWriterService.get_status"><code class="docutils literal notranslate"><span class="pre">NXSWriterService.get_status()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSWriterService.NXSWriterService.start"><code class="docutils literal notranslate"><span class="pre">NXSWriterService.start()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSWriterService.NXSWriterService.stop"><code class="docutils literal notranslate"><span class="pre">NXSWriterService.stop()</span></code></a></li>
@@ -196,10 +204,54 @@
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.add_attributes">
+<span class="sig-name descname"><span class="pre">add_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.add_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.add_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>add dataset attribute</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Dataset</span></code>) – h5cpp dataset</p></li>
+<li><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> &lt;<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <cite>any</cite>&gt;) – channel descrition</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.add_vmap">
+<span class="sig-name descname"><span class="pre">add_vmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vfl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.add_vmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.add_vmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>create field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – group name</p></li>
+<li><p><strong>type_code</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – nexus field type</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt; <a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> &gt;) – shape</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>file tree field</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Dataset</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.channels">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.channels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>returns a list of channels with description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of channels descriptions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;:obj: <cite>dict</cite> &gt;</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.close">
@@ -214,18 +266,18 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – group name</p></li>
-<li><p><strong>type_code</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – nexus field type</p></li>
+<li><p><strong>grp</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Group</span></code>) – nexus group</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – group name</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – nexus field type</p></li>
 <li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt; <a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> &gt;) – shape</p></li>
 <li><p><strong>chunk</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt; <a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> &gt;) – chunk</p></li>
-<li><p><strong>dfilter</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">H5CppDataFilter</span></code>) – filter deflater</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>file tree field</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">H5CppField</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Dataset</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -243,7 +295,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">nxgroup</span></code>) – root object</p></li>
+<li><p><strong>root</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Group</span></code>) – root object</p></li>
 <li><p><strong>lnxpath</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>&gt;) – nexus path list</p></li>
 <li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – nexus field type</p></li>
 <li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/functions.html#any" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">any</span></code></a>) – field value</p></li>
@@ -255,7 +307,80 @@
 <dd class="field-even"><p>nexus field</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">nxfield</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Dataset</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.create_groupvds">
+<span class="sig-name descname"><span class="pre">create_groupvds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnxpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.create_groupvds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.create_groupvds" title="Permalink to this definition">¶</a></dt>
+<dd><p>create field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">nxgroup</span></code>) – root object</p></li>
+<li><p><strong>lnxpath</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>&gt;) – nexus path list</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – nexus field type</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt; <a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> &gt;) – shape</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>nexus field</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Dataset</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.create_vds">
+<span class="sig-name descname"><span class="pre">create_vds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.create_vds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.create_vds" title="Permalink to this definition">¶</a></dt>
+<dd><p>create field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – group name</p></li>
+<li><p><strong>type_code</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – nexus field type</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt; <a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> &gt;) – shape</p></li>
+<li><p><strong>vmaps</strong> – virtual map list</p></li>
+<li><p><strong>fillvalue</strong> – vds file value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>&gt;</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>file tree field</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Dataset</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.generate_vmaps">
+<span class="sig-name descname"><span class="pre">generate_vmaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_per_acquisition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_per_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.generate_vmaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.generate_vmaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate virtual map list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt; <a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> &gt;) – shape</p></li>
+<li><p><strong>frame_per_acquisition</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – frame per acquisition</p></li>
+<li><p><strong>file_offset</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – file offset</p></li>
+<li><p><strong>file_format</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – file format</p></li>
+<li><p><strong>file_pattern</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – file pattern</p></li>
+<li><p><strong>data_path</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – nexus data path</p></li>
+<li><p><strong>frame_per_file</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – frame per file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>virtual map list</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>&gt;</p>
 </dd>
 </dl>
 </dd></dl>
@@ -263,7 +388,16 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.labels">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.labels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>returns a list of channels with description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of channel labels</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;:obj: <cite>str</cite> &gt;</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.prepareChannels">
@@ -275,6 +409,17 @@
 <dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.write_attr">
 <span class="sig-name descname"><span class="pre">write_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">am</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.write_attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.write_attr" title="Permalink to this definition">¶</a></dt>
 <dd><p>write attribute</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>am</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.attribute.AttributeManager</span></code>) – attribute manager</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – attribute name</p></li>
+<li><p><strong>name</strong> – attribute type</p></li>
+<li><p><strong>name</strong> – attribute value</p></li>
+<li><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>) – element description</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -299,6 +444,15 @@
 <dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.write_snapshot_item">
 <span class="sig-name descname"><span class="pre">write_snapshot_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_nexus_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.write_snapshot_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.write_snapshot_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>write snapshot item</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pninexus.h5cpp.node.Group</span></code>) – nexus root group</p></li>
+<li><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>) – element description</p></li>
+<li><p><strong>default_nexus_path</strong> (<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – default nexus path</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -391,6 +545,12 @@ by NXSDataWriter</p>
 <dt class="sig sig-object py" id="nxsblisswriter.NXSBlissWriter.NXSBlissWriter.DefaultNeXusPath">
 <span class="sig-name descname"><span class="pre">DefaultNeXusPath</span></span><a class="headerlink" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.DefaultNeXusPath" title="Permalink to this definition">¶</a></dt>
 <dd><p>default NeXus path</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSBlissWriter.NXSBlissWriter.Errors">
+<span class="sig-name descname"><span class="pre">Errors</span></span><a class="headerlink" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.Errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of errors</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -495,6 +655,11 @@ of the default behaviour does not fullfill the needs.</p>
 <dd><p>Initializes the attributes and properties of the NXSBlissWriter.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSBlissWriter.NXSBlissWriter.read_Errors">
+<span class="sig-name descname"><span class="pre">read_Errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSBlissWriter.html#NXSBlissWriter.read_Errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.read_Errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -518,6 +683,12 @@ of the default behaviour does not fullfill the needs.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSWriterService.NXSWriterService.errors">
+<span class="sig-name descname"><span class="pre">errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSWriterService.html#NXSWriterService.errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSWriterService.NXSWriterService.errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of errors</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nxsblisswriter.NXSWriterService.NXSWriterService.get_status">
 <span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSWriterService.html#NXSWriterService.get_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSWriterService.NXSWriterService.get_status" title="Permalink to this definition">¶</a></dt>

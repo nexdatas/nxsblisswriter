@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nxsblisswriter.NXSFile &#8212; NXSBlissWriter 0.1.0 documentation</title>
+    <title>nxsblisswriter.NXSFile &#8212; NXSBlissWriter 0.4.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           NXSBlissWriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -137,6 +137,7 @@
 <span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="c1"># from blissdata.redis_engine.store import DataStore</span>
 <span class="c1"># from blissdata.redis_engine.scan import ScanState</span>
@@ -186,7 +187,8 @@
 <span class="p">}</span>
 
 
-<span class="n">NOATTRS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;nexus_path&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;stream&quot;</span><span class="p">}</span>
+<span class="n">NOATTRS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;nexus_path&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;stream&quot;</span><span class="p">,</span> <span class="s2">&quot;__vmaps__&quot;</span><span class="p">,</span> <span class="s2">&quot;__vmaps_shape__&quot;</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="first"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.first">[docs]</a><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
@@ -286,13 +288,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__last_write_time</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__max_write_interval</span> <span class="o">=</span> <span class="n">max_write_interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vds_plugins</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lima&quot;</span><span class="p">]</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span> <span class="nf">channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; returns a list of channels with description</span>
+
+<span class="sd">        :returns: list of channels descriptions</span>
+<span class="sd">        :rtype: :obj:`list` &lt;:obj: `dict` &gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;datadesc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span> <span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; returns a list of channels with description</span>
+
+<span class="sd">        :returns: list of channel labels</span>
+<span class="sd">        :rtype: :obj:`list` &lt;:obj: `str` &gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">)</span>
 
@@ -394,37 +408,54 @@
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;No node [&quot;</span><span class="p">):</span>
                         <span class="c1"># print(&quot;S&quot;, key, shape, chunk, stream.dtype, ch)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_groupfield</span><span class="p">(</span>
-                            <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                            <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="n">chunk</span><span class="p">)</span>
-                        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">stream</span><span class="o">.</span><span class="n">plugin</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vds_plugins</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__vds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s2">&quot;nxpath&quot;</span><span class="p">:</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">dtype</span><span class="p">}</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_groupfield</span><span class="p">(</span>
+                                <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="n">chunk</span><span class="p">)</span>
+                            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Node [&quot;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                            <span class="s2">&quot;NXSFile::prepareChannels() - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
                     <span class="k">else</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="s2">&quot;NXSFile::prepareChannels() - &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                            <span class="s2">&quot;NXSFile::prepareChannels() - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
                         <span class="k">raise</span>
-                <span class="n">item</span> <span class="o">=</span> <span class="n">ch</span>
-                <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">attrs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="n">NOATTRS</span>
-                    <span class="n">am</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attributes</span>
-                    <span class="k">for</span> <span class="n">anm</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
-                        <span class="n">avl</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="n">anm</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                            <span class="n">av</span> <span class="o">=</span> <span class="n">avl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">av</span><span class="p">):</span>
-                                <span class="n">av</span> <span class="o">=</span> <span class="n">av</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                            <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">av</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-                        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>
-                            <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">avl</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-                        <span class="n">nanm</span> <span class="o">=</span> <span class="n">ATTRDESC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">anm</span><span class="p">,</span> <span class="n">anm</span><span class="p">)</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">write_attr</span><span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
-                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                                <span class="s2">&quot;NXSFile::prepareChannels() &quot;</span>
-                                <span class="s2">&quot;- </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
-                                <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_attributes</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">ch</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NXSFile.add_attributes"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.add_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">add_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; add dataset attribute</span>
+
+<span class="sd">        :param dataset: h5cpp dataset</span>
+<span class="sd">        :type dataset: :class:`pninexus.h5cpp.node.Dataset`</span>
+<span class="sd">        :param item: channel descrition</span>
+<span class="sd">        :type item: :obj:`dict` &lt;:obj:`str`, `any`&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="n">NOATTRS</span>
+            <span class="n">am</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attributes</span>
+            <span class="k">for</span> <span class="n">anm</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">avl</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="n">anm</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">av</span> <span class="o">=</span> <span class="n">avl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">av</span><span class="p">):</span>
+                        <span class="n">av</span> <span class="o">=</span> <span class="n">av</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">av</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>
+                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">avl</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">avl</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="n">nanm</span> <span class="o">=</span> <span class="n">ATTRDESC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">anm</span><span class="p">,</span> <span class="n">anm</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write_attr</span><span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s2">&quot;NXSFile::prepareChannels() &quot;</span>
+                        <span class="s2">&quot;- </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="NXSFile.write_scan_points"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_scan_points">[docs]</a>    <span class="k">def</span> <span class="nf">write_scan_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write step data</span>
@@ -491,7 +522,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s2">&quot;NXSFile::write_scan_point() - &quot;</span>
                 <span class="s2">&quot;End of stream for all columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">eos</span><span class="p">)))</span>
-            <span class="k">raise</span> <span class="n">eose</span></div>
+            <span class="k">if</span> <span class="n">eose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">eose</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">EndOfStream</span><span class="p">(</span><span class="s2">&quot;No active channels&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NXSFile.write_final_snapshot"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_final_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">write_final_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write final data</span>
@@ -521,24 +555,71 @@
                         <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">break</span></div>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="s2">&quot;datadesc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">si</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">ddesc</span> <span class="o">=</span> <span class="n">si</span><span class="p">[</span><span class="s2">&quot;datadesc&quot;</span><span class="p">]</span>
+        <span class="c1"># self._streams.info(&quot;CREATE VDS %s&quot; % (self.__vds))</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">vl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ddesc</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">ddesc</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="c1"># self._streams.info(&quot;CREATE DESC %s&quot; % (desc))</span>
+            <span class="n">nxpath</span> <span class="o">=</span> <span class="n">vl</span><span class="p">[</span><span class="s2">&quot;nxpath&quot;</span><span class="p">]</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">vl</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">streams</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;__vmaps_shape__&quot;</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">desc</span><span class="p">[</span><span class="s2">&quot;__vmaps_shape__&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">vmaps</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="s2">&quot;__vmaps__&quot;</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
+                <span class="n">vmaps</span> <span class="o">=</span> <span class="n">desc</span><span class="p">[</span><span class="s2">&quot;__vmaps__&quot;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">stream</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lima_v1&quot;</span><span class="p">]:</span>
+                <span class="n">linfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;lima_info&quot;</span><span class="p">]</span>
+                <span class="n">fp</span> <span class="o">=</span> <span class="n">linfo</span><span class="p">[</span><span class="s2">&quot;file_path&quot;</span><span class="p">]</span>
+                <span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fpath</span>
+                <span class="n">common_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fn</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fp</span><span class="p">])</span>
+                <span class="n">file_pattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">common_prefix</span><span class="p">)</span>
+                <span class="n">frame_per_acquisition</span> <span class="o">=</span> <span class="n">linfo</span><span class="p">[</span><span class="s2">&quot;frame_per_acquisition&quot;</span><span class="p">]</span>
+                <span class="c1"># acquisition_offset = linfo[&quot;acquisition_offset&quot;]</span>
+                <span class="n">file_offset</span> <span class="o">=</span> <span class="n">linfo</span><span class="p">[</span><span class="s2">&quot;file_offset&quot;</span><span class="p">]</span>
+                <span class="n">file_format</span> <span class="o">=</span> <span class="n">linfo</span><span class="p">[</span><span class="s2">&quot;file_format&quot;</span><span class="p">]</span>
+                <span class="n">data_path</span> <span class="o">=</span> <span class="n">linfo</span><span class="p">[</span><span class="s2">&quot;data_path&quot;</span><span class="p">]</span>
+                <span class="n">frame_per_file</span> <span class="o">=</span> <span class="n">linfo</span><span class="p">[</span><span class="s2">&quot;frame_per_file&quot;</span><span class="p">]</span>
+                <span class="n">vmaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_vmaps</span><span class="p">(</span>
+                    <span class="n">shape</span><span class="p">,</span>
+                    <span class="n">frame_per_acquisition</span><span class="p">,</span>
+                    <span class="n">file_offset</span><span class="p">,</span>
+                    <span class="n">file_format</span><span class="p">,</span>
+                    <span class="n">file_pattern</span><span class="p">,</span>
+                    <span class="n">data_path</span><span class="p">,</span>
+                    <span class="n">frame_per_file</span><span class="p">)</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+            <span class="c1"># self._streams.info(</span>
+            <span class="c1">#     &quot;CREATE GROUP %s %s %s %s&quot; % (nxpath, key, dtype, shape))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_groupvds</span><span class="p">(</span>
+                <span class="n">root</span><span class="p">,</span> <span class="n">nxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">desc</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NXSFile.create_field"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_field">[docs]</a>    <span class="k">def</span> <span class="nf">create_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
                      <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
 
-<span class="sd">        :param n: group name</span>
-<span class="sd">        :type n: :obj:`str`</span>
-<span class="sd">        :param type_code: nexus field type</span>
-<span class="sd">        :type type_code: :obj:`str`</span>
+<span class="sd">        :param grp: nexus group</span>
+<span class="sd">        :type grp: :class:`pninexus.h5cpp.node.Group`</span>
+<span class="sd">        :param name: group name</span>
+<span class="sd">        :type name: :obj:`str`</span>
+<span class="sd">        :param dtype: nexus field type</span>
+<span class="sd">        :type dtype: :obj:`str`</span>
 <span class="sd">        :param shape: shape</span>
 <span class="sd">        :type shape: :obj:`list` &lt; :obj:`int` &gt;</span>
 <span class="sd">        :param chunk: chunk</span>
 <span class="sd">        :type chunk: :obj:`list` &lt; :obj:`int` &gt;</span>
-<span class="sd">        :param dfilter: filter deflater</span>
-<span class="sd">        :type dfilter: :class:`H5CppDataFilter`</span>
 <span class="sd">        :returns: file tree field</span>
-<span class="sd">        :rtype: :class:`H5CppField`</span>
+<span class="sd">        :rtype: :class:`pninexus.h5cpp.node.Dataset`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># print(&quot;CREATE&quot;, name, dtype, value, shape, chunk)</span>
         <span class="n">dcpl</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">DatasetCreationList</span><span class="p">()</span>
@@ -570,7 +651,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
 
 <span class="sd">        :param root: root object</span>
-<span class="sd">        :type root: :class:`nxgroup`</span>
+<span class="sd">        :type root: :class:`pninexus.h5cpp.node.Group`</span>
 <span class="sd">        :param lnxpath: nexus path list</span>
 <span class="sd">        :type lnxpath: :obj:`list` &lt;:obj:`str`&gt;</span>
 <span class="sd">        :param dtype: nexus field type</span>
@@ -582,7 +663,7 @@
 <span class="sd">        :param chunk: chunk</span>
 <span class="sd">        :type chunk: :obj:`list` &lt; :obj:`int` &gt;</span>
 <span class="sd">        :returns: nexus field</span>
-<span class="sd">        :rtype: :class:`nxfield`</span>
+<span class="sd">        :rtype: :class:`pninexus.h5cpp.node.Dataset`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">grp</span> <span class="o">=</span> <span class="n">root</span>
         <span class="k">for</span> <span class="n">gr</span> <span class="ow">in</span> <span class="n">lnxpath</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
@@ -607,8 +688,200 @@
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dataset</span></div>
 
+<div class="viewcode-block" id="NXSFile.add_vmap"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.add_vmap">[docs]</a>    <span class="k">def</span> <span class="nf">add_vmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vfl</span><span class="p">,</span> <span class="n">vmap</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
+
+<span class="sd">        :param n: group name</span>
+<span class="sd">        :type n: :obj:`str`</span>
+<span class="sd">        :param type_code: nexus field type</span>
+<span class="sd">        :type type_code: :obj:`str`</span>
+<span class="sd">        :param shape: shape</span>
+<span class="sd">        :type shape: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :returns: file tree field</span>
+<span class="sd">        :rtype: :class:`pninexus.h5cpp.node.Dataset`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lview</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;view&quot;</span><span class="p">]</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+        <span class="n">eview</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;sourceview&quot;</span><span class="p">]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
+        <span class="n">sds</span> <span class="o">=</span> <span class="n">eview</span><span class="p">[</span><span class="s2">&quot;dataspace&quot;</span><span class="p">]</span>
+        <span class="n">lds</span> <span class="o">=</span> <span class="n">lview</span><span class="p">[</span><span class="s2">&quot;dataspace&quot;</span><span class="p">]</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">lds</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">]</span>
+        <span class="n">eshape</span> <span class="o">=</span> <span class="n">sds</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">]</span>
+        <span class="n">h5_lds</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Simple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">h5_sds</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Simple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">eshape</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="s2">&quot;selection&quot;</span> <span class="ow">in</span> <span class="n">lview</span><span class="p">:</span>
+            <span class="n">selection</span> <span class="o">=</span> <span class="n">lview</span><span class="p">[</span><span class="s2">&quot;selection&quot;</span><span class="p">]</span>
+            <span class="n">h5_selection</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Hyperslab</span><span class="p">(</span><span class="o">**</span><span class="n">selection</span><span class="p">)</span>
+            <span class="n">h5_lview</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">View</span><span class="p">(</span><span class="n">h5_lds</span><span class="p">,</span> <span class="n">h5_selection</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h5_lview</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">View</span><span class="p">(</span><span class="n">h5_lds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;selection&quot;</span> <span class="ow">in</span> <span class="n">eview</span><span class="p">:</span>
+            <span class="n">usel</span> <span class="o">=</span> <span class="n">eview</span><span class="p">[</span><span class="s2">&quot;selection&quot;</span><span class="p">]</span>
+            <span class="n">h5_usel</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Hyperslab</span><span class="p">(</span><span class="o">**</span><span class="n">usel</span><span class="p">)</span>
+            <span class="n">h5_eview</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">View</span><span class="p">(</span><span class="n">h5_sds</span><span class="p">,</span> <span class="n">h5_usel</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h5_eview</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">View</span><span class="p">(</span><span class="n">h5_sds</span><span class="p">)</span>
+
+        <span class="c1"># self._streams.info(&quot;ADD %s %s &quot; % (fname, path))</span>
+        <span class="n">vfl</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">h5cpp</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">VirtualDataMap</span><span class="p">(</span>
+            <span class="n">h5_lview</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname</span><span class="p">),</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">h5_eview</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="NXSFile.generate_vmaps"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.generate_vmaps">[docs]</a>    <span class="k">def</span> <span class="nf">generate_vmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">frame_per_acquisition</span><span class="p">,</span>
+                       <span class="n">file_offset</span><span class="p">,</span> <span class="n">file_format</span><span class="p">,</span> <span class="n">file_pattern</span><span class="p">,</span>
+                       <span class="n">data_path</span><span class="p">,</span> <span class="n">frame_per_file</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; generate virtual map list</span>
+
+<span class="sd">        :param shape: shape</span>
+<span class="sd">        :type shape: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :param frame_per_acquisition: frame per acquisition</span>
+<span class="sd">        :type frame_per_acquisition: :obj:`int`</span>
+<span class="sd">        :param file_offset: file offset</span>
+<span class="sd">        :type file_offset: :obj:`int`</span>
+<span class="sd">        :param file_format: file format</span>
+<span class="sd">        :type file_format: :obj:`str`</span>
+<span class="sd">        :param file_pattern: file pattern</span>
+<span class="sd">        :type file_pattern: :obj:`str`</span>
+<span class="sd">        :param data_path: nexus data path</span>
+<span class="sd">        :type data_path: :obj:`str`</span>
+<span class="sd">        :param frame_per_file: frame per file</span>
+<span class="sd">        :type frame_per_file: :obj:`int`</span>
+<span class="sd">        :returns: virtual map list</span>
+<span class="sd">        :rtype: :obj:`list` &lt;:obj:`dict`&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vmaps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">file_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;hdf5&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">frame_per_acquisition</span> \
+           <span class="ow">or</span> <span class="ow">not</span> <span class="n">data_path</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">frame_per_file</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">vmaps</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">acq_nb</span><span class="p">,</span> <span class="n">remaining_scan_frame_nb</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">frame_per_acquisition</span><span class="p">)</span>
+        <span class="n">acq_files_nb</span><span class="p">,</span> <span class="n">last_file_scan_frame_nb</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span>
+            <span class="n">frame_per_acquisition</span><span class="p">,</span> <span class="n">frame_per_file</span><span class="p">)</span>
+        <span class="n">remaining_acq_files_nb</span><span class="p">,</span> <span class="n">remaining_last_file_scan_frame_nb</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span>
+            <span class="n">remaining_scan_frame_nb</span><span class="p">,</span> <span class="n">frame_per_file</span><span class="p">)</span>
+        <span class="n">acq_frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame_per_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">acq_files_nb</span>
+        <span class="k">if</span> <span class="n">last_file_scan_frame_nb</span><span class="p">:</span>
+            <span class="n">acq_frames</span> <span class="o">+=</span> <span class="p">[</span><span class="n">last_file_scan_frame_nb</span><span class="p">]</span>
+        <span class="n">remaining_frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame_per_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">remaining_acq_files_nb</span>
+        <span class="k">if</span> <span class="n">remaining_last_file_scan_frame_nb</span><span class="p">:</span>
+            <span class="n">remaining_frames</span> <span class="o">+=</span> <span class="p">[</span><span class="n">remaining_last_file_scan_frame_nb</span><span class="p">]</span>
+        <span class="n">frame_nb</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">acq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">acq_nb</span><span class="p">):</span>
+            <span class="n">frame_nb</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">acq_frames</span><span class="p">)</span>
+        <span class="n">frame_nb</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">remaining_frames</span><span class="p">)</span>
+        <span class="n">off</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">nb</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frame_nb</span><span class="p">):</span>
+            <span class="n">vmap</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">fid</span> <span class="o">=</span> <span class="n">file_offset</span> <span class="o">+</span> <span class="n">nid</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="n">file_pattern</span> <span class="o">%</span> <span class="n">fid</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="n">file_pattern</span>
+            <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;VirtualDataMap&quot;</span>
+            <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span>
+            <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_path</span>
+            <span class="n">vshape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[:]</span>
+            <span class="n">vshape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">off</span>
+            <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;view&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;View&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;dataspace&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;Simple&quot;</span><span class="p">,</span>
+                                          <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="n">vshape</span><span class="p">},</span>
+                            <span class="s2">&quot;selection&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="n">vshape</span><span class="p">,</span>
+                                          <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
+                                          <span class="s2">&quot;stride&quot;</span><span class="p">:</span> <span class="n">vshape</span><span class="p">,</span>
+                                          <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">vshape</span><span class="p">)</span>
+                                          <span class="p">}</span>
+                            <span class="p">}</span>
+            <span class="n">vmap</span><span class="p">[</span><span class="s2">&quot;sourceview&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;View&quot;</span><span class="p">,</span>
+                                  <span class="s2">&quot;dataspace&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;Simple&quot;</span><span class="p">,</span>
+                                                <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="n">vshape</span><span class="p">}}</span>
+            <span class="n">off</span> <span class="o">+=</span> <span class="n">nb</span>
+            <span class="n">vmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vmap</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vmaps</span></div>
+
+<div class="viewcode-block" id="NXSFile.create_vds"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_vds">[docs]</a>    <span class="k">def</span> <span class="nf">create_vds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
+
+<span class="sd">        :param n: group name</span>
+<span class="sd">        :type n: :obj:`str`</span>
+<span class="sd">        :param type_code: nexus field type</span>
+<span class="sd">        :type type_code: :obj:`str`</span>
+<span class="sd">        :param shape: shape</span>
+<span class="sd">        :type shape: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :param vmaps: virtual map list</span>
+<span class="sd">        :type: :obj:`list` &lt;:obj:`dict`&gt;</span>
+<span class="sd">        :param fillvalue: vds file value</span>
+<span class="sd">        :type fillvalue: :any:</span>
+<span class="sd">        :returns: file tree field</span>
+<span class="sd">        :rtype: :class:`pninexus.h5cpp.node.Dataset`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self._streams.info(</span>
+        <span class="c1">#    &quot;CREATE %s %s %s %s &quot; % (name, dtype, shape, vmaps))</span>
+
+        <span class="n">vfl</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">VirtualDataMaps</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">vmap</span> <span class="ow">in</span> <span class="n">vmaps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_vmap</span><span class="p">(</span><span class="n">vfl</span><span class="p">,</span> <span class="n">vmap</span><span class="p">)</span>
+        <span class="n">dcpl</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">DatasetCreationList</span><span class="p">()</span>
+        <span class="n">dcpl</span><span class="o">.</span><span class="n">set_fill_value</span><span class="p">(</span><span class="n">fillvalue</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="n">dtype</span><span class="p">])</span>
+        <span class="n">dataspace</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">Simple</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span>
+            <span class="nb">tuple</span><span class="p">([</span><span class="n">h5cpp</span><span class="o">.</span><span class="n">dataspace</span><span class="o">.</span><span class="n">UNLIMITED</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)))</span>
+        <span class="n">vf</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">VirtualDataset</span><span class="p">(</span>
+            <span class="n">grp</span><span class="p">,</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">PTH</span><span class="p">[</span><span class="n">dtype</span><span class="p">],</span> <span class="n">dataspace</span><span class="p">,</span> <span class="n">vfl</span><span class="p">,</span> <span class="n">dcpl</span><span class="o">=</span><span class="n">dcpl</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vf</span></div>
+
+<div class="viewcode-block" id="NXSFile.create_groupvds"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_groupvds">[docs]</a>    <span class="k">def</span> <span class="nf">create_groupvds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
+
+<span class="sd">        :param root: root object</span>
+<span class="sd">        :type root: :class:`nxgroup`</span>
+<span class="sd">        :param lnxpath: nexus path list</span>
+<span class="sd">        :type lnxpath: :obj:`list` &lt;:obj:`str`&gt;</span>
+<span class="sd">        :param dtype: nexus field type</span>
+<span class="sd">        :type dtype: :obj:`str`</span>
+<span class="sd">        :param shape: shape</span>
+<span class="sd">        :type shape: :obj:`list` &lt; :obj:`int` &gt;</span>
+<span class="sd">        :returns: nexus field</span>
+<span class="sd">        :rtype: :class:`pninexus.h5cpp.node.Dataset`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="k">for</span> <span class="n">gr</span> <span class="ow">in</span> <span class="n">lnxpath</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">gn</span> <span class="o">=</span> <span class="n">gr</span>
+            <span class="n">gt</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">gr</span><span class="p">:</span>
+                <span class="n">gn</span><span class="p">,</span> <span class="n">gt</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">grp</span><span class="o">.</span><span class="n">has_group</span><span class="p">(</span><span class="n">gn</span><span class="p">):</span>
+                <span class="n">grp</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">gn</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">grp</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">Group</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">gn</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">gt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">grp</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                        <span class="s2">&quot;NX_class&quot;</span><span class="p">,</span>
+                        <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gt</span><span class="p">)</span>
+            <span class="c1"># print(gn)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">lnxpath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># print(&quot;CREATE %s (%s)&quot; % (nxpath, dtype))</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_vds</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataset</span></div>
+
 <div class="viewcode-block" id="NXSFile.write_attr"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_attr">[docs]</a>    <span class="k">def</span> <span class="nf">write_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">am</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write attribute</span>
+
+<span class="sd">        :param am: attribute manager</span>
+<span class="sd">        :type am: :class:`pninexus.h5cpp.attribute.AttributeManager`</span>
+<span class="sd">        :param name: attribute name</span>
+<span class="sd">        :type name: :obj:`str`</span>
+<span class="sd">        :param name: attribute type</span>
+<span class="sd">        :type name: :obj:`str`</span>
+<span class="sd">        :param name: attribute value</span>
+<span class="sd">        :type name: :any:</span>
+<span class="sd">        :param item: element description</span>
+<span class="sd">        :type item: :obj:`dict`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -682,6 +955,13 @@
 
 <div class="viewcode-block" id="NXSFile.write_snapshot_item"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_snapshot_item">[docs]</a>    <span class="k">def</span> <span class="nf">write_snapshot_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">default_nexus_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write snapshot item</span>
+
+<span class="sd">        :param root: nexus root group</span>
+<span class="sd">        :type root: :class:`pninexus.h5cpp.node.Group`</span>
+<span class="sd">        :param item: element description</span>
+<span class="sd">        :type item: :obj:`dict`</span>
+<span class="sd">        :param default_nexus_path: default nexus path</span>
+<span class="sd">        :type default_nexus_path: :obj:`str`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nxpath</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nexus_path&#39;</span><span class="p">,</span> <span class="n">default_nexus_path</span><span class="p">)</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -728,27 +1008,7 @@
                         <span class="s2">&quot;NXSFile::write_snapshot_item() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
                         <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
                     <span class="k">raise</span>
-        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">attrs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="n">NOATTRS</span>
-            <span class="n">am</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attributes</span>
-            <span class="k">for</span> <span class="n">anm</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
-                <span class="n">avl</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="n">anm</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">av</span> <span class="o">=</span> <span class="n">avl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">av</span><span class="p">):</span>
-                        <span class="n">av</span> <span class="o">=</span> <span class="n">av</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">av</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">avl</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>
-                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dtp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">avl</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-                <span class="n">nanm</span> <span class="o">=</span> <span class="n">ATTRDESC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">anm</span><span class="p">,</span> <span class="n">anm</span><span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">write_attr</span><span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="s2">&quot;NXSFile::write_snapshot_item() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
-                        <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_attributes</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NXSFile.close"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; close file</span>
