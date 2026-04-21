@@ -493,8 +493,7 @@ class NXSFile:
             #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))
             self.__nxfields[key] = self.create_groupvds(
                 root, nxpath, dtype, shape, vmaps)
-            ch = ddesc.values()
-            self.add_attributes(self.__nxfields[key], ch)
+            self.add_attributes(self.__nxfields[key], desc)
 
     def create_field(self, grp, name, dtype,
                      value=None, shape=None, chunk=None):
