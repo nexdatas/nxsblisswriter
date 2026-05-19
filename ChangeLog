@@ -1,3 +1,7 @@
+2026-05-19 Jan Kotanski <jankotan@gmail.com>
+	* set default path if there is not common file path (#46)
+	* tagged as v0.5.0
+
 2026-04-21 Jan Kotanski <jankotan@gmail.com>
 	* add support for vds attributes (#44)
 	* add Errors attribute (#44)
