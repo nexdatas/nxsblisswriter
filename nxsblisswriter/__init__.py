@@ -20,7 +20,6 @@
 """ Implementation of NexDaTaS Configuration Server """
 
 # package version
-from tango.server import run
 
 from .Release import __version__
 
@@ -33,6 +32,7 @@ def main(args=None, **kwargs):
     :param args: command-line arguments
     :type args: :obj:`list` <:obj:`str`>
     """
+    from tango.server import run
     from .NXSBlissWriter import NXSBlissWriter as NXSBlWriter
     # from .NXSBlissWriter import NXSBlissWriterClass as NXSBLSrvClass
 

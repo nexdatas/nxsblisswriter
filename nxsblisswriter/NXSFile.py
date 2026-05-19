@@ -473,7 +473,13 @@ class NXSFile:
                 fn = self.__fpath
                 common_prefix = os.path.commonprefix(
                     [os.path.split(fn)[0], fp])
-                file_pattern = os.path.relpath(fp, common_prefix)
+                if common_prefix in ["/", "", os.sep]:
+                    tfn = os.path.splitext(fn)
+                    ofp = fp.split(os.sep)
+                    file_pattern = os.sep.join([tfn[0], key, ofp[-1]])
+                else:
+                    file_pattern = os.path.relpath(fp, common_prefix)
+
                 frame_per_acquisition = linfo["frame_per_acquisition"]
                 # acquisition_offset = linfo["acquisition_offset"]
                 file_offset = linfo["file_offset"]
@@ -691,6 +697,7 @@ class NXSFile:
                                                 "shape": vshape}}
             off += nb
             vmaps.append(vmap)
+            # print("VMAP", vmap)
         return vmaps
 
     def create_vds(self, grp, name, dtype, shape, vmaps, fillvalue=0):
