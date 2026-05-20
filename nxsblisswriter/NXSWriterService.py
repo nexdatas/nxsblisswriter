@@ -94,6 +94,7 @@ class NXSWriterService:
                     continue
                 scan = self.__datastore.load_scan(key)
                 if self.__session in ["__all__", scan.session]:
+                    self.join_scans()
                     sw = ScanWriter(
                         scan, self._streams,
                         self.__next_scan_timeout,
@@ -106,6 +107,22 @@ class NXSWriterService:
                 self.__error = True
                 with self.__error_lock:
                     self.__errors.append(str(e))
+
+    def joint_scans(self, stop=False):
+        """ join scans  which are stopped
+
+        :param stop: stop all scans flag
+        :type stop: :obj:`bool`
+        """
+        for key in list(self.__sws.keys()):
+            sw = self.__sws.pop(key)
+            if stop:
+                sw.running = False
+            if not sw.running:
+                if self.error:
+                    with self.__error_lock:
+                        self.__errors.extend(self.errors[:])
+                sw.join()
 
     def get_status(self):
         """ get writer service status
@@ -120,12 +137,7 @@ class NXSWriterService:
         """ stop writer service
         """
         self.__running = False
-        while self.__sws:
-            sw = self.__sws.pop()
-            sw.running = False
-            if self.error:
-                with self.__error_lock:
-                    self.__errors.extend(self.errors[:])
+        self.joint_scans(stop=True)
 
     def errors(self):
         """ list of errors
@@ -223,6 +235,7 @@ class ScanWriter(threading.Thread):
             self.error = True
             with self.error_lock:
                 self.errors.append(str(e))
+        self.running = False
 
 
 def main():
