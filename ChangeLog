@@ -1,3 +1,7 @@
+2026-05-20 Jan Kotanski <jankotan@gmail.com>
+	* run scan writer in a separate thread  (#50)
+	* tagged as v0.5.0
+
 2026-05-19 Jan Kotanski <jankotan@gmail.com>
 	* set default path if there is not common file path (#46)
 	* tagged as v0.5.0
