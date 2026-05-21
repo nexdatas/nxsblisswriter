@@ -785,7 +785,7 @@ class NXSFile:
         try:
             if name in [att.name for att in am]:
                 at = am[name]
-        except Exception as e:
+        except Exception:
             pass
         if at is None:
             try:

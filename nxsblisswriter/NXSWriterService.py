@@ -173,7 +173,7 @@ class ScanWriter(threading.Thread):
         #: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set
         self._streams = streams
         #: (:obj:`bool`) service running flag
-        self.running = False
+        self.running = True
         #: (:obj:`bool`) service error flag
         self.error = False
         #: (:obj:`int`) scan timeout in seconds
