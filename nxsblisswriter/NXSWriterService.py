@@ -108,7 +108,7 @@ class NXSWriterService:
                 with self.__error_lock:
                     self.__errors.append(str(e))
 
-    def joint_scans(self, stop=False):
+    def join_scans(self, stop=False):
         """ join scans  which are stopped
 
         :param stop: stop all scans flag
@@ -119,9 +119,9 @@ class NXSWriterService:
             if stop:
                 sw.running = False
             if not sw.running:
-                if self.error:
+                if sw.error:
                     with self.__error_lock:
-                        self.__errors.extend(self.errors[:])
+                        self.__errors.extend(sw.errors[:])
                 sw.join()
 
     def get_status(self):
@@ -167,6 +167,7 @@ class ScanWriter(threading.Thread):
         :param point_sleep_time: sleep time between write point calls
         :type point_sleep_time: :obj:`float`
         """
+        threading.Thread.__init__(self)
         #: (:class:`Scan`) blissdata scan
         self._scan = scan
         #: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set

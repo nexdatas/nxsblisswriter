@@ -781,12 +781,12 @@ class NXSFile:
         :param item: element description
         :type item: :obj:`dict`
         """
-
+        at = None
         try:
-            at = am[name]
-            # print("TYPE",name, value, at.dataspace.type)
-        except Exception:
-            at = None
+            if name in [att.name for att in am]:
+                at = am[name]
+        except Exception as e:
+            pass
         if at is None:
             try:
                 vshape = None
@@ -805,10 +805,13 @@ class NXSFile:
         try:
             if at is not None:
                 try:
+                    rvalue = None
                     try:
-                        rvalue = at.read()
+                        if at.dataspace.type == h5cpp.dataspace.Type.SCALAR \
+                           or sum(at.dataspace.current_dimensions):
+                            rvalue = at.read()
                     except Exception:
-                        rvalue = None
+                        pass
                     ashape = None
                     vshape = None
                     if isinstance(value, list):
