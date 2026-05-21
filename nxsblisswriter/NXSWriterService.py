@@ -73,6 +73,8 @@ class NXSWriterService:
         self.__errors = []
         #: (:class:`threading.Lock`) threading lock
         self.__error_lock = threading.Lock()
+        #: (:obj:`dict`<:obj:`str`, :class:`ScanWriter`>) scan writers
+        self.__sws = {}
 
     def start(self):
         """ start writer service
@@ -92,11 +94,35 @@ class NXSWriterService:
                     continue
                 scan = self.__datastore.load_scan(key)
                 if self.__session in ["__all__", scan.session]:
-                    self.write_scan(scan)
+                    self.join_scans()
+                    sw = ScanWriter(
+                        scan, self._streams,
+                        self.__next_scan_timeout,
+                        self.__default_nexus_path,
+                        self.__point_sleep_time)
+                    self.__sws[key] = sw
+                    sw.start()
+                    #  self.write_scan(scan)
             except Exception as e:
                 self.__error = True
                 with self.__error_lock:
                     self.__errors.append(str(e))
+
+    def join_scans(self, stop=False):
+        """ join scans  which are stopped
+
+        :param stop: stop all scans flag
+        :type stop: :obj:`bool`
+        """
+        for key in list(self.__sws.keys()):
+            sw = self.__sws.pop(key)
+            if stop:
+                sw.running = False
+            if not sw.running:
+                if sw.error:
+                    with self.__error_lock:
+                        self.__errors.extend(sw.errors[:])
+                sw.join()
 
     def get_status(self):
         """ get writer service status
@@ -111,6 +137,7 @@ class NXSWriterService:
         """ stop writer service
         """
         self.__running = False
+        self.joint_scans(stop=True)
 
     def errors(self):
         """ list of errors
@@ -120,50 +147,96 @@ class NXSWriterService:
             errors = self.__errors[:]
         return errors
 
-    def write_scan(self, scan):
+
+class ScanWriter(threading.Thread):
+
+    def __init__(self, scan, streams, next_scan_timeout,
+                 default_nexus_path="/scan{serialno}:NXentry/"
+                 "instrument:NXinstrument/collection",
+                 point_sleep_time=0.01):
+        """ constructor
+
+        :param scan: blissdata redis url
+        :type scan: :class:`Scan`
+        :param streams: tango streams
+        :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`
+        :param next_scan_timeout: timeout  between the scans in seconds
+        :type next_scan_timeout: :obj:`int`
+        :param default_nexus_path: default nexus path
+        :type default_nexus_path: :obj:`str`
+        :param point_sleep_time: sleep time between write point calls
+        :type point_sleep_time: :obj:`float`
+        """
+        threading.Thread.__init__(self)
+        #: (:class:`Scan`) blissdata scan
+        self._scan = scan
+        #: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set
+        self._streams = streams
+        #: (:obj:`bool`) service running flag
+        self.running = True
+        #: (:obj:`bool`) service error flag
+        self.error = False
+        #: (:obj:`int`) scan timeout in seconds
+        self.__next_scan_timeout = next_scan_timeout
+        #: (:obj:`str`) default nexus path
+        self.__default_nexus_path = default_nexus_path
+        #: (:obj:`float`) sleep time between write point calls
+        self.__point_sleep_time = point_sleep_time
+        #: (:obj:`list`<:obj:`str`>) error list
+        self.errors = []
+        #: (:class:`threading.Lock`) threading lock
+        self.error_lock = threading.Lock()
+
+    def run(self):
         """ write scan data
 
-        :param scan: blissdata scan
-        :type scan:
         """
-        while scan.state < ScanState.PREPARED:
-            time.sleep(self.__point_sleep_time)
-            scan.update()
-        self._streams.info(
-            "NXSWriterService::write_scan CREATE FILE: %s" % scan.number)
-
-        nxsfl = create_nexus_file(
-            scan,
-            self._streams,
-            self.__default_nexus_path)
-        if nxsfl is None:
-            return
-
-        self._streams.info(
-            "NXSWriterService::write_scan INIT: %s" % scan.number)
-        nxsfl.write_init_snapshot()
-
-        nxsfl.prepareChannels()
-
-        # while scan.state < ScanState.STOPPED:
-        while self.__running:
-            try:
-                scan.update(block=False)
-                self._streams.debug(
-                    "NXSWriterService::write_scan SCAN POINT: %s"
-                    % scan.number)
-                nxsfl.write_scan_points()
+        self.running = True
+        try:
+            while self._scan.state < ScanState.PREPARED and self.running:
                 time.sleep(self.__point_sleep_time)
-            except EndOfStream:
-                break
-        while scan.state < ScanState.CLOSED:
-            time.sleep(self.__point_sleep_time)
-            scan.update()
+                self._scan.update()
+            self._streams.info(
+                "NXSWriterService::write_scan CREATE FILE: %s"
+                % self._scan.number)
 
-        self._streams.info(
-            "NXSWriterService::write_scan FINAL: %s" % scan.number)
-        nxsfl.write_final_snapshot()
-        nxsfl.close()
+            nxsfl = create_nexus_file(
+                self._scan,
+                self._streams,
+                self.__default_nexus_path)
+            if nxsfl is None:
+                return
+
+            self._streams.info(
+                "NXSWriterService::write_scan INIT: %s" % self._scan.number)
+            nxsfl.write_init_snapshot()
+
+            nxsfl.prepareChannels()
+
+            # while scan.state < ScanState.STOPPED:
+            while self.running:
+                try:
+                    self._scan.update(block=False)
+                    self._streams.debug(
+                        "NXSWriterService::write_scan SCAN POINT: %s"
+                        % self._scan.number)
+                    nxsfl.write_scan_points()
+                    time.sleep(self.__point_sleep_time)
+                except EndOfStream:
+                    break
+            while self._scan.state < ScanState.CLOSED and self.running:
+                time.sleep(self.__point_sleep_time)
+                self._scan.update()
+
+            self._streams.info(
+                "NXSWriterService::write_scan FINAL: %s" % self._scan.number)
+            nxsfl.write_final_snapshot()
+            nxsfl.close()
+        except Exception as e:
+            self.error = True
+            with self.error_lock:
+                self.errors.append(str(e))
+        self.running = False
 
 
 def main():
