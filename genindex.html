@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; NXSBlissWriter 0.4.0 documentation</title>
+    <title>Index &#8212; NXSBlissWriter 0.6.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           NXSBlissWriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.6</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -117,6 +117,7 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -180,10 +181,16 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.Errors">Errors (nxsblisswriter.NXSBlissWriter.NXSBlissWriter attribute)</a>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.ScanWriter.error">error (nxsblisswriter.NXSWriterService.ScanWriter attribute)</a>
+</li>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.ScanWriter.error_lock">error_lock (nxsblisswriter.NXSWriterService.ScanWriter attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.Errors">Errors (nxsblisswriter.NXSBlissWriter.NXSBlissWriter attribute)</a>
+</li>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.ScanWriter.errors">errors (nxsblisswriter.NXSWriterService.ScanWriter attribute)</a>
+</li>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.NXSWriterService.errors">errors() (nxsblisswriter.NXSWriterService.NXSWriterService method)</a>
 </li>
   </ul></td>
@@ -213,6 +220,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.init_device">init_device() (nxsblisswriter.NXSBlissWriter.NXSBlissWriter method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.NXSWriterService.join_scans">join_scans() (nxsblisswriter.NXSWriterService.NXSWriterService method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -316,11 +331,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.read_Errors">read_Errors() (nxsblisswriter.NXSBlissWriter.NXSBlissWriter method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.RedisUrl">RedisUrl (nxsblisswriter.NXSBlissWriter.NXSBlissWriter attribute)</a>
 </li>
-      <li><a href="nxsblisswriter.html#nxsblisswriter.run">run() (in module nxsblisswriter)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.ScanWriter.run">run() (nxsblisswriter.NXSWriterService.ScanWriter method)</a>
+</li>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.ScanWriter.running">running (nxsblisswriter.NXSWriterService.ScanWriter attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -328,6 +345,8 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.ScanWriter">ScanWriter (class in nxsblisswriter.NXSWriterService)</a>
+</li>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.Session">Session (nxsblisswriter.NXSBlissWriter.NXSBlissWriter attribute)</a>
 </li>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSBlissWriter.NXSBlissWriter.Start">Start() (nxsblisswriter.NXSBlissWriter.NXSBlissWriter method)</a>
@@ -362,11 +381,9 @@
 </li>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_final_snapshot">write_final_snapshot() (nxsblisswriter.NXSFile.NXSFile method)</a>
 </li>
-      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_init_snapshot">write_init_snapshot() (nxsblisswriter.NXSFile.NXSFile method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSWriterService.NXSWriterService.write_scan">write_scan() (nxsblisswriter.NXSWriterService.NXSWriterService method)</a>
+      <li><a href="nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_init_snapshot">write_init_snapshot() (nxsblisswriter.NXSFile.NXSFile method)</a>
 </li>
       <li><a href="nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_scan_points">write_scan_points() (nxsblisswriter.NXSFile.NXSFile method)</a>
 </li>
