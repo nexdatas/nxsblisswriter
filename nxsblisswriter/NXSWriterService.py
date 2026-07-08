@@ -234,7 +234,6 @@ class ScanWriter(threading.Thread):
             self._streams.info(
                 "NXSWriterService::write_scan FINAL: %s" % self._scan.number)
             nxsfl.write_final_snapshot()
-            nxsfl.close()
         except Exception as e:
             self.error = True
             with self.error_lock:
