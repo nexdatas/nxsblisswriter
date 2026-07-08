@@ -228,6 +228,9 @@ class ScanWriter(threading.Thread):
                 time.sleep(self.__point_sleep_time)
                 self._scan.update()
 
+            self._streams.debug(
+                "NXSWriterService::update VDS: %s" % self._scan.number)
+            nxsfl.updateVDS()
             self._streams.info(
                 "NXSWriterService::write_scan FINAL: %s" % self._scan.number)
             nxsfl.write_final_snapshot()

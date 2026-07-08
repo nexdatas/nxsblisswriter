@@ -276,21 +276,21 @@ class NXSFile:
         for ch in self.channels:
             key = ch["label"]
             # print("CH", key, list(self.__scan.streams.keys()))
+            nxpath = ch.get(
+                'nexus_path',
+                "%s/%s" % (self.__default_nexus_path, key))
+            lnxpath = nxpath.split("/")
+            h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
             if key in list(self.__scan.streams.keys()):
                 stream = self.__scan.streams[key]
                 self.__cursors[key] = stream.cursor()
                 shape = [0] + list(stream.shape)
                 chunk = [1] + list(stream.shape)
-                nxpath = ch.get(
-                    'nexus_path',
-                    "%s/%s" % (self.__default_nexus_path, key))
                 dtype = str(stream.dtype)
                 if hasattr(dtype, "__name__"):
                     dtype = str(dtype.__name__)
                 if dtype == "string":
                     dtype = "str"
-                lnxpath = nxpath.split("/")
-                h5path = "/".join([nd.split(":")[0] for nd in lnxpath])
                 root = self.__mfile.root()
                 dataset = None
                 try:
@@ -316,6 +316,30 @@ class NXSFile:
                             "NXSFile::prepareChannels() - %s" % (str(e)))
                         raise
                 self.add_attributes(dataset, ch)
+
+    def updateVDS(self):
+        """ prepare cursors
+        """
+        si = self.__scan.info
+        if "datadesc" not in si:
+            return
+        channels = si["datadesc"]
+        for _, ch in channels.items():
+            try:
+                key = ch["label"]
+                nxpath = ch.get(
+                    'nexus_path',
+                    "%s/%s" % (self.__default_nexus_path, key))
+                lnxpath = nxpath.split("/")
+                if key not in list(self.__scan.streams.keys()):
+                    dtype = ch['dtype']
+                    self.__vds[key] = {
+                        "nxpath": lnxpath, "dtype": dtype}
+                    _ = ch["__vmaps_shape__"]
+                    _ = ch["__vmaps__"]
+            except Exception as e:
+                self._streams.error(
+                    "NXSFile::prepareChannels() - %s" % (str(e)))
 
     def add_attributes(self, dataset, item):
         """ add dataset attribute
@@ -459,7 +483,9 @@ class NXSFile:
             # self._streams.info("CREATE DESC %s" % (desc))
             nxpath = vl["nxpath"]
             dtype = vl["dtype"]
-            stream = self.__scan.streams[key]
+            stream = self.__scan.streams[key] \
+                if key in self.__scan.streams else None
+            shape = None
             if "__vmaps_shape__" in desc:
                 shape = desc["__vmaps_shape__"]
             else:
@@ -763,7 +789,7 @@ class NXSFile:
                         h5cpp.datatype.kVariableString).write(gt)
             # print(gn)
         name = lnxpath[-1]
-        # print("CREATE %s (%s)" % (nxpath, dtype))
+        # print("CREATE VDS", name, dtype, shape, vmaps)
         dataset = self.create_vds(grp, name, dtype, shape, vmaps)
         return dataset
 

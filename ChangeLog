@@ -1,4 +1,8 @@
 2026-05-21 Jan Kotanski <jankotan@gmail.com>
+	* add support for VDS without streams  (#54)
+	* tagged as v0.7.0
+
+2026-05-21 Jan Kotanski <jankotan@gmail.com>
 	* run scan writer in a separate thread  (#50)
 	* tagged as v0.6.0
 
