@@ -1,4 +1,8 @@
-2026-05-21 Jan Kotanski <jankotan@gmail.com>
+2026-07-08 Jan Kotanski <jankotan@gmail.com>
+	* always close the file (#56)
+	* tagged as v0.7.1
+
+2026-07-08 Jan Kotanski <jankotan@gmail.com>
 	* add support for VDS without streams  (#54)
 	* tagged as v0.7.0
 

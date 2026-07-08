@@ -239,6 +239,9 @@ class ScanWriter(threading.Thread):
             self.error = True
             with self.error_lock:
                 self.errors.append(str(e))
+            self._streams.error("NXSWriterService::error %s" % str(e))
+        finally:
+            nxsfl.close()
         self.running = False
 
 
