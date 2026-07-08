@@ -316,16 +316,30 @@ class NXSFile:
                             "NXSFile::prepareChannels() - %s" % (str(e)))
                         raise
                 self.add_attributes(dataset, ch)
-            else:
-                try:
+
+    def updateVDS(self):
+        """ prepare cursors
+        """
+        si = self.__scan.info
+        if "datadesc" not in si:
+            return
+        channels = si["datadesc"]
+        for _, ch in channels.items():
+            try:
+                key = ch["label"]
+                nxpath = ch.get(
+                    'nexus_path',
+                    "%s/%s" % (self.__default_nexus_path, key))
+                lnxpath = nxpath.split("/")
+                if key not in list(self.__scan.streams.keys()):
                     dtype = ch['dtype']
                     self.__vds[key] = {
                         "nxpath": lnxpath, "dtype": dtype}
                     _ = ch["__vmaps_shape__"]
                     _ = ch["__vmaps__"]
-                except Exception as e:
-                    self._streams.error(
-                        "NXSFile::prepareChannels() - %s" % (str(e)))
+            except Exception as e:
+                self._streams.error(
+                    "NXSFile::prepareChannels() - %s" % (str(e)))
 
     def add_attributes(self, dataset, item):
         """ add dataset attribute
@@ -775,7 +789,7 @@ class NXSFile:
                         h5cpp.datatype.kVariableString).write(gt)
             # print(gn)
         name = lnxpath[-1]
-        # print("CREATE %s (%s)" % (nxpath, dtype))
+        # print("CREATE VDS", name, dtype, shape, vmaps)
         dataset = self.create_vds(grp, name, dtype, shape, vmaps)
         return dataset
 
