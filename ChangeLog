@@ -1,3 +1,7 @@
+2026-07-10 Jan Kotanski <jankotan@gmail.com>
+	* add support for duplicated datadesc (#59)
+	* tagged as v0.8.0
+
 2026-07-08 Jan Kotanski <jankotan@gmail.com>
 	* always close the file (#56)
 	* tagged as v0.7.1

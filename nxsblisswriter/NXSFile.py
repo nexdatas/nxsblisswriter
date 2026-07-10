@@ -177,6 +177,7 @@ class NXSFile:
         self.__mfile = None
         self.__cursors = {}
         self.__nxfields = {}
+        self.__lbnames = {}
         self.__last_write_time = 0
         self.__max_write_interval = max_write_interval
         self.__vds = {}
@@ -275,6 +276,11 @@ class NXSFile:
         # -           self.__cursors[key] = stream.cursor()
         for ch in self.channels:
             key = ch["label"]
+            name = ch.get("name", key)
+            if key in self.__lbnames:
+                self.__lbnames[key].append(name)
+            else:
+                self.__lbnames[key] = [name]
             # print("CH", key, list(self.__scan.streams.keys()))
             nxpath = ch.get(
                 'nexus_path',
@@ -294,8 +300,8 @@ class NXSFile:
                 root = self.__mfile.root()
                 dataset = None
                 try:
-                    self.__nxfields[key] = root.get_dataset(h5path)
-                    dataset = self.__nxfields[key]
+                    self.__nxfields[name] = root.get_dataset(h5path)
+                    dataset = self.__nxfields[name]
                 except Exception as e:
                     if str(e).startswith("No node ["):
                         # print("S", key, shape, chunk, stream.dtype, ch)
@@ -303,10 +309,10 @@ class NXSFile:
                             self.__vds[key] = {
                                 "nxpath": lnxpath, "dtype": dtype}
                         else:
-                            self.__nxfields[key] = self.create_groupfield(
+                            self.__nxfields[name] = self.create_groupfield(
                                 root, lnxpath, dtype, value=None,
                                 shape=shape, chunk=chunk)
-                            dataset = self.__nxfields[key]
+                            dataset = self.__nxfields[name]
                     elif str(e).startswith("Node ["):
                         self._streams.warn(
                             "NXSFile::prepareChannels() - %s" % (str(e)))
@@ -410,21 +416,22 @@ class NXSFile:
                     continue
                 # print("CHANNEL", ch["label"], ch["shape"], values)
                 npoints = len(values)
-                if npoints:
-                    oldshape = \
-                        self.__nxfields[key].dataspace.current_dimensions
-                    rank = len(oldshape)
-                    if rank:
-                        offset = [0] * rank
-                        block = list(oldshape)
-                        offset[0] = oldshape[0]
-                        block[0] = npoints
-                        selection = h5cpp.dataspace.Hyperslab(
-                            offset=offset, block=block)
-                        self.__nxfields[key].extent(0, npoints)
-                        # print(self.__nxfields[key].dataspace.current_dimensions)
-                        # print(offset, block)
-                        self.__nxfields[key].write(values, selection)
+                for name in self.__lbnames.get(key, [key]):
+                    if npoints:
+                        oldshape = \
+                            self.__nxfields[name].dataspace.current_dimensions
+                        rank = len(oldshape)
+                        if rank:
+                            offset = [0] * rank
+                            block = list(oldshape)
+                            offset[0] = oldshape[0]
+                            block[0] = npoints
+                            selection = h5cpp.dataspace.Hyperslab(
+                                offset=offset, block=block)
+                            self.__nxfields[name].extent(0, npoints)
+                            # print(self.__nxfields[name].dataspace.current_dimensions)
+                            # print(offset, block)
+                            self.__nxfields[name].write(values, selection)
             except Exception as e:
                 self._streams.error(
                     "NXSFile::write_scan_points()- %s %s %s %s"
@@ -946,3 +953,4 @@ class NXSFile:
         self.__mfile = None
         self.__cursors = {}
         self.__nxfields = {}
+        self.__lbnames = {}
