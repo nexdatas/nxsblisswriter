@@ -498,9 +498,7 @@ class NXSFile:
             else:
                 shape = [len(stream)] + list(stream.shape)
             vmaps = []
-            if "__vmaps__" in desc:
-                vmaps = desc["__vmaps__"]
-            elif stream.info["format"] in ["lima_v1"]:
+            if stream.info["format"] in ["lima_v1"]:
                 linfo = stream.info["lima_info"]
                 fp = linfo["file_path"]
                 fn = self.__fpath
@@ -527,6 +525,8 @@ class NXSFile:
                     file_pattern,
                     data_path,
                     frame_per_file)
+            elif "__vmaps__" in desc:
+                vmaps = desc["__vmaps__"]
             root = self.__mfile.root()
             # self._streams.info(
             #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))

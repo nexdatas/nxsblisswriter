@@ -1,3 +1,7 @@
+2026-07-14 Jan Kotanski <jankotan@gmail.com>
+	* generate vmap for lima (#62)
+	* tagged as v0.9.0
+
 2026-07-10 Jan Kotanski <jankotan@gmail.com>
 	* add support for duplicated datadesc (#59)
 	* tagged as v0.8.0
