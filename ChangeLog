@@ -1,3 +1,7 @@
+2026-08-03 Jan Kotanski <jankotan@gmail.com>
+	* add VMapShapePlugins and VMapPlugins properties (#66)
+	* tagged as v0.10.0
+
 2026-07-14 Jan Kotanski <jankotan@gmail.com>
 	* generate vmap for lima (#62)
 	* tagged as v0.9.0
