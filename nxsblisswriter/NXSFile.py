@@ -505,8 +505,10 @@ class NXSFile:
             shape = None
             if key in self.__vmaps_shape_plugins and "__vmaps_shape__" in desc:
                 shape = desc["__vmaps_shape__"]
-            else:
+            elif stream is not None:
                 shape = [len(stream)] + list(stream.shape)
+            elif "__vmaps_shape__" in desc:
+                shape = desc["__vmaps_shape__"]
             vmaps = []
             if stream.info["format"] in ["lima_v1"]:
                 linfo = stream.info["lima_info"]
