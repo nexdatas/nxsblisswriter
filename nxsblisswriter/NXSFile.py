@@ -108,7 +108,8 @@ def first(array):
 def create_nexus_file(scan,
                       streams,
                       default_nexus_path="/scan{serialno}:NXentry/"
-                      "instrument:NXinstrument/collection"):
+                      "instrument:NXinstrument/collection",
+                      vmaps_shape_plugins=None):
     """ open nexus file
 
     :param scan: blissdata scan
@@ -117,6 +118,8 @@ def create_nexus_file(scan,
     :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`
     :param default_nexus_path: default nexus path
     :type default_nexus_path: :obj:`str`
+    :param vmaps_shape_plugins: vmaps_shape plugins
+    :type vmaps_shape_plugins: :obj:`list` <:obj:`str`>
     :returns: nexus file object
     :rtype: :obj:`NXSFile`
     """
@@ -143,7 +146,9 @@ def create_nexus_file(scan,
     nxsfl = NXSFile(scan, fpath,
                     streams,
                     default_nexus_path.format(
-                        number=number, serialno=serialno, entryname=entryname))
+                        number=number, serialno=serialno, entryname=entryname),
+                    vmaps_shape_plugins
+                    )
     # ?? append mode
     if not fpath.exists():
         nxsfl.create_file_structure()
@@ -155,6 +160,7 @@ class NXSFile:
     def __init__(self, scan, fpath, streams,
                  default_nexus_path="/scan{serialno}:NXentry/"
                  "instrument:NXinstrument/collection",
+                 vmaps_shape_plugins=None,
                  max_write_interval=1):
         """ constructor
 
@@ -166,6 +172,8 @@ class NXSFile:
         :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`
         :param default_nexus_path: default nexus path
         :type default_nexus_path: :obj:`str`
+        :param vmaps_shape_plugins: vmaps_shape plugins
+        :type vmaps_shape_plugins: :obj:`list` <:obj:`str`>
         :param max_write_interval: max write interval
         :type max_write_interval: :obj:`int`
         """
@@ -180,6 +188,8 @@ class NXSFile:
         self.__lbnames = {}
         self.__last_write_time = 0
         self.__max_write_interval = max_write_interval
+        #: (:obj:`list` <:obj:`str`>) vmaps shape plugins
+        self.__vmaps_shape_plugins = vmaps_shape_plugins or []
         self.__vds = {}
         self.__vds_plugins = ["lima"]
 
@@ -493,10 +503,12 @@ class NXSFile:
             stream = self.__scan.streams[key] \
                 if key in self.__scan.streams else None
             shape = None
-            if "__vmaps_shape__" in desc:
+            if key in self.__vmaps_shape_plugins and "__vmaps_shape__" in desc:
                 shape = desc["__vmaps_shape__"]
-            else:
+            elif stream is not None:
                 shape = [len(stream)] + list(stream.shape)
+            elif "__vmaps_shape__" in desc:
+                shape = desc["__vmaps_shape__"]
             vmaps = []
             if stream.info["format"] in ["lima_v1"]:
                 linfo = stream.info["lima_info"]

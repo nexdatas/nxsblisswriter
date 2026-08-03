@@ -50,6 +50,9 @@ class NXSBlissWriter(Device):
         PointSleepTime
             - sleep time between write_point command calls
             - Type:'float'
+        VMapsShapePlugins
+            - use __vmaps_shape__ variable
+            - Type:'DevVarStringArray'
     """
 
     # -----------------
@@ -86,6 +89,12 @@ class NXSBlissWriter(Device):
         doc="sleep time between write_point command calls"
     )
 
+    VMapsShapePlugins = device_property(
+        dtype='DevVarStringArray',
+        doc="use __vmaps_shape__ variable",
+        default_value=[]
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -109,6 +118,7 @@ class NXSBlissWriter(Device):
             self.RedisUrl, self.Session, self.NextScanTimeout,
             self.DefaultNeXusPath,
             self.PointSleepTime,
+            self.VMapsShapePlugins,
             self
         )
         self.Start()
