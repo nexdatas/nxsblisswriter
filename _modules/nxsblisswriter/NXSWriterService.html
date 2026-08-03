@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nxsblisswriter.NXSWriterService &#8212; NXSBlissWriter 0.6.0 documentation</title>
+    <title>nxsblisswriter.NXSWriterService &#8212; NXSBlissWriter 0.10.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           NXSBlissWriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.10</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -146,7 +146,8 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redis_url</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">next_scan_timeout</span><span class="p">,</span>
                  <span class="n">default_nexus_path</span><span class="o">=</span><span class="s2">&quot;/scan</span><span class="si">{serialno}</span><span class="s2">:NXentry/&quot;</span>
                  <span class="s2">&quot;instrument:NXinstrument/collection&quot;</span><span class="p">,</span>
-                 <span class="n">point_sleep_time</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">point_sleep_time</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                 <span class="n">vmaps_shape_plugins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; constructor</span>
 
 <span class="sd">        :param redis_url: blissdata redis url</span>
@@ -159,6 +160,8 @@
 <span class="sd">        :type default_nexus_path: :obj:`str`</span>
 <span class="sd">        :param point_sleep_time: sleep time between write point calls</span>
 <span class="sd">        :type point_sleep_time: :obj:`float`</span>
+<span class="sd">        :param vmaps_shape_plugins: vmaps_shape plugins</span>
+<span class="sd">        :type vmaps_shape_plugins: :obj:`list` &lt;:obj:`str`&gt;</span>
 <span class="sd">        :param server: NXSConfigServer instance</span>
 <span class="sd">        :type server: :class:`tango.LatestDeviceImpl`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -176,6 +179,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__session</span> <span class="o">=</span> <span class="n">session</span>
         <span class="c1">#: (:obj:`float`) sleep time between write point calls</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__point_sleep_time</span> <span class="o">=</span> <span class="n">point_sleep_time</span>
+        <span class="c1">#: (:obj:`list` &lt;:obj:`str`&gt;) vmaps shape plugins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vmaps_shape_plugins</span> <span class="o">=</span> <span class="n">vmaps_shape_plugins</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="c1">#: (:class:`blissdata.redis_engine.store.DataStore`) datastore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__datastore</span> <span class="o">=</span> <span class="n">DataStore</span><span class="p">(</span><span class="n">redis_url</span><span class="p">)</span>
         <span class="c1">#: (:obj:`list`&lt;:obj:`str`&gt;) error list</span>
@@ -208,7 +213,8 @@
                         <span class="n">scan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__next_scan_timeout</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">__point_sleep_time</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__point_sleep_time</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__vmaps_shape_plugins</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__sws</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">sw</span>
                     <span class="n">sw</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                     <span class="c1">#  self.write_scan(scan)</span>
@@ -262,7 +268,8 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">,</span> <span class="n">streams</span><span class="p">,</span> <span class="n">next_scan_timeout</span><span class="p">,</span>
                  <span class="n">default_nexus_path</span><span class="o">=</span><span class="s2">&quot;/scan</span><span class="si">{serialno}</span><span class="s2">:NXentry/&quot;</span>
                  <span class="s2">&quot;instrument:NXinstrument/collection&quot;</span><span class="p">,</span>
-                 <span class="n">point_sleep_time</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+                 <span class="n">point_sleep_time</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                 <span class="n">vmaps_shape_plugins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; constructor</span>
 
 <span class="sd">        :param scan: blissdata redis url</span>
@@ -275,6 +282,8 @@
 <span class="sd">        :type default_nexus_path: :obj:`str`</span>
 <span class="sd">        :param point_sleep_time: sleep time between write point calls</span>
 <span class="sd">        :type point_sleep_time: :obj:`float`</span>
+<span class="sd">        :param vmaps_shape_plugins: vmaps_shape plugins</span>
+<span class="sd">        :type vmaps_shape_plugins: :obj:`list` &lt;:obj:`str`&gt;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="c1">#: (:class:`Scan`) blissdata scan</span>
@@ -291,6 +300,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span> <span class="o">=</span> <span class="n">default_nexus_path</span>
         <span class="c1">#: (:obj:`float`) sleep time between write point calls</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__point_sleep_time</span> <span class="o">=</span> <span class="n">point_sleep_time</span>
+        <span class="c1">#: (:obj:`list` &lt;:obj:`str`&gt;) vmaps shape plugins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vmaps_shape_plugins</span> <span class="o">=</span> <span class="n">vmaps_shape_plugins</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="c1">#: (:obj:`list`&lt;:obj:`str`&gt;) error list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1">#: (:class:`threading.Lock`) threading lock</span>
@@ -312,7 +323,8 @@
             <span class="n">nxsfl</span> <span class="o">=</span> <span class="n">create_nexus_file</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_scan</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__default_nexus_path</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__vmaps_shape_plugins</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">nxsfl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span>
 
@@ -337,14 +349,19 @@
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__point_sleep_time</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_scan</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;NXSWriterService::update VDS: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
+            <span class="n">nxsfl</span><span class="o">.</span><span class="n">updateVDS</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s2">&quot;NXSWriterService::write_scan FINAL: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
             <span class="n">nxsfl</span><span class="o">.</span><span class="n">write_final_snapshot</span><span class="p">()</span>
-            <span class="n">nxsfl</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_lock</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;NXSWriterService::error </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">nxsfl</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span></div></div>
 
 
