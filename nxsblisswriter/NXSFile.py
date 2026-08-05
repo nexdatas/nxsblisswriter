@@ -510,7 +510,8 @@ class NXSFile:
             elif "__vmaps_shape__" in desc:
                 shape = desc["__vmaps_shape__"]
             vmaps = []
-            if stream.info["format"] in ["lima_v1"]:
+            if hasattr(stream, "info") and \
+                    stream.info["format"] in ["lima_v1"]:
                 linfo = stream.info["lima_info"]
                 fp = linfo["file_path"]
                 fn = self.__fpath
