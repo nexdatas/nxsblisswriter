@@ -216,6 +216,7 @@ class ScanWriter(threading.Thread):
                 self._streams,
                 self.__default_nexus_path,
                 self.__vmaps_shape_plugins)
+
             if nxsfl is None:
                 return
 
@@ -252,7 +253,12 @@ class ScanWriter(threading.Thread):
                 self.errors.append(str(e))
             self._streams.error("NXSWriterService::error %s" % str(e))
         finally:
-            nxsfl.close()
+            try:
+                nxsfl.close()
+            except Exception as e:
+                with self.error_lock:
+                    self.errors.append(str(e))
+                self._streams.error("NXSWriterService::error %s" % str(e))
         self.running = False
 
 
