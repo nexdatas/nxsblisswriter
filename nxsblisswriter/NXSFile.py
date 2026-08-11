@@ -44,11 +44,14 @@ try:
 except Exception:
     NPMAJOR = 1
 
+utf8 = h5cpp.datatype.kVariableString
+utf8.encoding = h5cpp.datatype.CharacterEncoding.UTF8
 
 PTH = {
     "long": h5cpp.datatype.Integer,
-    "str": h5cpp.datatype.kVariableString,
-    "unicode": h5cpp.datatype.kVariableString,
+    "str": utf8,
+    "unicode": utf8,
+    "ascii": h5cpp.datatype.kVariableString,
     "bool": h5cpp.datatype.kEBool,
     "int": h5cpp.datatype.kInt64,
     "int64": h5cpp.datatype.kInt64,
