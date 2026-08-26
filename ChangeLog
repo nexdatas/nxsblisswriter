@@ -1,3 +1,7 @@
+2026-08-26 Jan Kotanski <jankotan@gmail.com>
+	* remove NXSBlissWriter  (#76)
+	* tagged as v0.12.1
+
 2026-08-27 Jan Kotanski <jankotan@gmail.com>
 	* define NXSBlissWriter as entry point (#75)
 	* tagged as v0.12.0
