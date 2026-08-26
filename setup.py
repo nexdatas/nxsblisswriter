@@ -114,7 +114,10 @@ SETUPDATA = dict(
         'Programming Language :: Python :: 3.13',
     ],
     install_requires=install_requires,
-    scripts=['NXSBlissWriter'],
+    entry_points={
+        'console_scripts':
+        'NXSBlissWriter = nxsblisswriter:main'},
+    # scripts=['NXSBlissWriter'],
     cmdclass={
         # 'test': TestCommand,
         'build_sphinx': BuildDoc
