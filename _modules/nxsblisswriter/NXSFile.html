@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nxsblisswriter.NXSFile &#8212; NXSBlissWriter 0.10.0 documentation</title>
+    <title>nxsblisswriter.NXSFile &#8212; NXSBlissWriter 0.13.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           NXSBlissWriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.10</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.13</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -153,11 +153,14 @@
 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
     <span class="n">NPMAJOR</span> <span class="o">=</span> <span class="mi">1</span>
 
+<span class="n">utf8</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span>
+<span class="n">utf8</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">CharacterEncoding</span><span class="o">.</span><span class="n">UTF8</span>
 
 <span class="n">PTH</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;long&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span>
-    <span class="s2">&quot;str&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">,</span>
-    <span class="s2">&quot;unicode&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">,</span>
+    <span class="s2">&quot;str&quot;</span><span class="p">:</span> <span class="n">utf8</span><span class="p">,</span>
+    <span class="s2">&quot;unicode&quot;</span><span class="p">:</span> <span class="n">utf8</span><span class="p">,</span>
+    <span class="s2">&quot;ascii&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kVariableString</span><span class="p">,</span>
     <span class="s2">&quot;bool&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kEBool</span><span class="p">,</span>
     <span class="s2">&quot;int&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt64</span><span class="p">,</span>
     <span class="s2">&quot;int64&quot;</span><span class="p">:</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">kInt64</span><span class="p">,</span>
@@ -619,7 +622,8 @@
             <span class="k">elif</span> <span class="s2">&quot;__vmaps_shape__&quot;</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
                 <span class="n">shape</span> <span class="o">=</span> <span class="n">desc</span><span class="p">[</span><span class="s2">&quot;__vmaps_shape__&quot;</span><span class="p">]</span>
             <span class="n">vmaps</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">stream</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lima_v1&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">)</span> <span class="ow">and</span> \
+                    <span class="n">stream</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lima_v1&quot;</span><span class="p">]:</span>
                 <span class="n">linfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;lima_info&quot;</span><span class="p">]</span>
                 <span class="n">fp</span> <span class="o">=</span> <span class="n">linfo</span><span class="p">[</span><span class="s2">&quot;file_path&quot;</span><span class="p">]</span>
                 <span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fpath</span>
