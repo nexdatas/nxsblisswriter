@@ -1,3 +1,7 @@
+2026-09-09 Jan Kotanski <jankotan@gmail.com>
+	* close file when scan.info is not closed (#79)
+	* tagged as v0.13.0
+
 2026-08-26 Jan Kotanski <jankotan@gmail.com>
 	* remove NXSBlissWriter  (#76)
 	* tagged as v0.12.1
