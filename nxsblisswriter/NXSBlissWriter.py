@@ -95,6 +95,11 @@ class NXSBlissWriter(Device):
         default_value=[]
     )
 
+    VDSPlugins = device_property(
+        dtype='DevVarStringArray',
+        default_value=["lima", "asapo_stream"],
+        doc="list of VDS plugins"
+    )
     # ----------
     # Attributes
     # ----------
@@ -119,6 +124,7 @@ class NXSBlissWriter(Device):
             self.DefaultNeXusPath,
             self.PointSleepTime,
             self.VMapsShapePlugins,
+            self.VDSPlugins,
             self
         )
         self.Start()

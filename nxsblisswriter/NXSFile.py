@@ -112,7 +112,8 @@ def create_nexus_file(scan,
                       streams,
                       default_nexus_path="/scan{serialno}:NXentry/"
                       "instrument:NXinstrument/collection",
-                      vmaps_shape_plugins=None):
+                      vmaps_shape_plugins=None,
+                      vds_plugins=None):
     """ open nexus file
 
     :param scan: blissdata scan
@@ -123,6 +124,8 @@ def create_nexus_file(scan,
     :type default_nexus_path: :obj:`str`
     :param vmaps_shape_plugins: vmaps_shape plugins
     :type vmaps_shape_plugins: :obj:`list` <:obj:`str`>
+    :param vds_plugins: vds plugins
+    :type vds_plugins: :obj:`list` <:obj:`str`>
     :returns: nexus file object
     :rtype: :obj:`NXSFile`
     """
@@ -150,7 +153,7 @@ def create_nexus_file(scan,
                     streams,
                     default_nexus_path.format(
                         number=number, serialno=serialno, entryname=entryname),
-                    vmaps_shape_plugins
+                    vmaps_shape_plugins, vds_plugins
                     )
     # ?? append mode
     if not fpath.exists():
@@ -164,6 +167,7 @@ class NXSFile:
                  default_nexus_path="/scan{serialno}:NXentry/"
                  "instrument:NXinstrument/collection",
                  vmaps_shape_plugins=None,
+                 vds_plugins=None,
                  max_write_interval=1):
         """ constructor
 
@@ -177,6 +181,8 @@ class NXSFile:
         :type default_nexus_path: :obj:`str`
         :param vmaps_shape_plugins: vmaps_shape plugins
         :type vmaps_shape_plugins: :obj:`list` <:obj:`str`>
+        :param vds_plugins: vds plugins
+        :type vds_plugins: :obj:`list` <:obj:`str`>
         :param max_write_interval: max write interval
         :type max_write_interval: :obj:`int`
         """
@@ -194,7 +200,8 @@ class NXSFile:
         #: (:obj:`list` <:obj:`str`>) vmaps shape plugins
         self.__vmaps_shape_plugins = vmaps_shape_plugins or []
         self.__vds = {}
-        self.__vds_plugins = ["lima", "asapo_stream"]
+        #: (:obj:`list` <:obj:`str`>) vds plugins
+        self.__vds_plugins = vds_plugins or ["lima", "asapo_stream"]
 
     @functools.cached_property
     def channels(self):
