@@ -1,3 +1,7 @@
+2026-10-08 Jan Kotanski <jankotan@gmail.com>
+	* add asapo stream to vds plugins (#82)
+	* tagged as v0.14.0
+
 2026-09-09 Jan Kotanski <jankotan@gmail.com>
 	* close file when scan.info is not closed (#79)
 	* tagged as v0.13.0
