@@ -38,7 +38,8 @@ class NXSWriterService:
                  default_nexus_path="/scan{serialno}:NXentry/"
                  "instrument:NXinstrument/collection",
                  point_sleep_time=0.01,
-                 vmaps_shape_plugins=None, server=None):
+                 vmaps_shape_plugins=None, vds_plugins=None,
+                 server=None):
         """ constructor
 
         :param redis_url: blissdata redis url
@@ -53,6 +54,8 @@ class NXSWriterService:
         :type point_sleep_time: :obj:`float`
         :param vmaps_shape_plugins: vmaps_shape plugins
         :type vmaps_shape_plugins: :obj:`list` <:obj:`str`>
+        :param vds_plugins: vds plugins
+        :type vds_plugins: :obj:`list` <:obj:`str`>
         :param server: NXSConfigServer instance
         :type server: :class:`tango.LatestDeviceImpl`
         """
@@ -72,6 +75,8 @@ class NXSWriterService:
         self.__point_sleep_time = point_sleep_time
         #: (:obj:`list` <:obj:`str`>) vmaps shape plugins
         self.__vmaps_shape_plugins = vmaps_shape_plugins or []
+        #: (:obj:`list` <:obj:`str`>) vds plugins
+        self.__vds_plugins = vds_plugins or ["lima", "asapo_stream"]
         #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
         self.__datastore = DataStore(redis_url)
         #: (:obj:`list`<:obj:`str`>) error list
@@ -105,7 +110,9 @@ class NXSWriterService:
                         self.__next_scan_timeout,
                         self.__default_nexus_path,
                         self.__point_sleep_time,
-                        self.__vmaps_shape_plugins)
+                        self.__vmaps_shape_plugins,
+                        self.__vds_plugins,
+                    )
                     self.__sws[key] = sw
                     sw.start()
                     #  self.write_scan(scan)
@@ -160,7 +167,7 @@ class ScanWriter(threading.Thread):
                  default_nexus_path="/scan{serialno}:NXentry/"
                  "instrument:NXinstrument/collection",
                  point_sleep_time=0.01,
-                 vmaps_shape_plugins=None):
+                 vmaps_shape_plugins=None, vds_plugins=None):
         """ constructor
 
         :param scan: blissdata redis url
@@ -175,6 +182,8 @@ class ScanWriter(threading.Thread):
         :type point_sleep_time: :obj:`float`
         :param vmaps_shape_plugins: vmaps_shape plugins
         :type vmaps_shape_plugins: :obj:`list` <:obj:`str`>
+        :param vds_plugins: vds plugins
+        :type vds_plugins: :obj:`list` <:obj:`str`>
         """
         threading.Thread.__init__(self)
         #: (:class:`Scan`) blissdata scan
@@ -193,6 +202,8 @@ class ScanWriter(threading.Thread):
         self.__point_sleep_time = point_sleep_time
         #: (:obj:`list` <:obj:`str`>) vmaps shape plugins
         self.__vmaps_shape_plugins = vmaps_shape_plugins or []
+        #: (:obj:`list` <:obj:`str`>) vds plugins
+        self.__vds_plugins = vds_plugins or ["lima", "asapo_stream"]
         #: (:obj:`list`<:obj:`str`>) error list
         self.errors = []
         #: (:class:`threading.Lock`) threading lock
@@ -215,7 +226,9 @@ class ScanWriter(threading.Thread):
                 self._scan,
                 self._streams,
                 self.__default_nexus_path,
-                self.__vmaps_shape_plugins)
+                self.__vmaps_shape_plugins,
+                self.__vds_plugins
+            )
 
             if nxsfl is None:
                 return
