@@ -194,7 +194,7 @@ class NXSFile:
         #: (:obj:`list` <:obj:`str`>) vmaps shape plugins
         self.__vmaps_shape_plugins = vmaps_shape_plugins or []
         self.__vds = {}
-        self.__vds_plugins = ["lima"]
+        self.__vds_plugins = ["lima", "asapo_stream"]
 
     @functools.cached_property
     def channels(self):
@@ -513,7 +513,7 @@ class NXSFile:
             elif "__vmaps_shape__" in desc:
                 shape = desc["__vmaps_shape__"]
             vmaps = []
-            if hasattr(stream, "info") and \
+            if hasattr(stream, "info") and "format" in stream.info and \
                     stream.info["format"] in ["lima_v1"]:
                 linfo = stream.info["lima_info"]
                 fp = linfo["file_path"]
