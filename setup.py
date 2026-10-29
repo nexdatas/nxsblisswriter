@@ -55,7 +55,6 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-
 release = get_version().__version__
 version = ".".join(release.split(".")[:2])
 name = "NXSBlissWriter"
