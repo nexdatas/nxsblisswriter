@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 
-if [ "$2" = "2" ]; then
-    echo "run python-nxsrecselector"
-    docker exec ndts python test/main.py $1
-else
-    echo "run python3-nxsrecselector"
-    docker exec ndts python3 -m pytest
-fi
+echo "run python3-nxsrecselector"
+docker exec ndts python3 -m pytest
 ERR=$?
 
 echo "ERROR: "$ERR
