@@ -51,9 +51,7 @@ class NXSBlissWriterTest(unittest.TestCase):
     def __init__(self, methodName):
         unittest.TestCase.__init__(self, methodName)
 
-        self.helperror = "usage: NXSBlissWriter instance_name " \
-            "[-v[trace level]] [-host] [-port] " \
-            "[-file=<file_name> | -nodb [-dlist]"
+        self.helperror = "usage: NXSBlissWriter instance_name"
 
         self.helpinfo = """"""
 
