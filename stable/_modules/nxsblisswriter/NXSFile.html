@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nxsblisswriter.NXSFile &#8212; NXSBlissWriter 0.14.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>nxsblisswriter.NXSFile &#8212; nxsblisswriter 0.15.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css?v=4468db6d" />
+    <script src="../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 <meta charset='utf-8'>
@@ -36,8 +33,8 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="../../index.html">
-          NXSBlissWriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14</b></span>
+          nxsblisswriter</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.15</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -104,7 +101,23 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><p>
+  <h3 class='versions'>Versions</h3>
+  <p>
+    <ul>
+      <li><a class="reference external" href="../../index/../../latest/index.html">v:latest</a></li>
+      <li><a class="reference external" href="../../index/../../stable/index.html">v:stable</a></li>
+      
+      <li><a class="reference external" href="../../index/../../v0.15.0/index.html">v0.15.0</a></li>
+      <li><a class="reference external" href="../../index/../../v0.14.0/index.html">v0.14.0</a></li>
+      
+    </ul>
+  </p>
+</p>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for nxsblisswriter.NXSFile</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
@@ -194,7 +207,9 @@
            <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;stream&quot;</span><span class="p">,</span> <span class="s2">&quot;__vmaps__&quot;</span><span class="p">,</span> <span class="s2">&quot;__vmaps_shape__&quot;</span><span class="p">}</span>
 
 
-<div class="viewcode-block" id="first"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.first">[docs]</a><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+<div class="viewcode-block" id="first">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.first">[docs]</a>
+<span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;  get first element if the only</span>
 
 <span class="sd">    :param array: numpy array</span>
@@ -217,7 +232,10 @@
     <span class="k">return</span> <span class="n">array</span></div>
 
 
-<div class="viewcode-block" id="create_nexus_file"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.create_nexus_file">[docs]</a><span class="k">def</span> <span class="nf">create_nexus_file</span><span class="p">(</span><span class="n">scan</span><span class="p">,</span>
+
+<div class="viewcode-block" id="create_nexus_file">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.create_nexus_file">[docs]</a>
+<span class="k">def</span> <span class="nf">create_nexus_file</span><span class="p">(</span><span class="n">scan</span><span class="p">,</span>
                       <span class="n">streams</span><span class="p">,</span>
                       <span class="n">default_nexus_path</span><span class="o">=</span><span class="s2">&quot;/scan</span><span class="si">{serialno}</span><span class="s2">:NXentry/&quot;</span>
                       <span class="s2">&quot;instrument:NXinstrument/collection&quot;</span><span class="p">,</span>
@@ -270,7 +288,10 @@
     <span class="k">return</span> <span class="n">nxsfl</span></div>
 
 
-<div class="viewcode-block" id="NXSFile"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile">[docs]</a><span class="k">class</span> <span class="nc">NXSFile</span><span class="p">:</span>
+
+<div class="viewcode-block" id="NXSFile">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile">[docs]</a>
+<span class="k">class</span> <span class="nc">NXSFile</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">,</span> <span class="n">fpath</span><span class="p">,</span> <span class="n">streams</span><span class="p">,</span>
                  <span class="n">default_nexus_path</span><span class="o">=</span><span class="s2">&quot;/scan</span><span class="si">{serialno}</span><span class="s2">:NXentry/&quot;</span>
@@ -312,6 +333,8 @@
         <span class="c1">#: (:obj:`list` &lt;:obj:`str`&gt;) vds plugins</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__vds_plugins</span> <span class="o">=</span> <span class="n">vds_plugins</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">&quot;lima&quot;</span><span class="p">,</span> <span class="s2">&quot;asapo_stream&quot;</span><span class="p">]</span>
 
+<div class="viewcode-block" id="NXSFile.channels">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.channels">[docs]</a>
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span> <span class="nf">channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; returns a list of channels with description</span>
@@ -319,8 +342,11 @@
 <span class="sd">        :returns: list of channels descriptions</span>
 <span class="sd">        :rtype: :obj:`list` &lt;:obj: `dict` &gt;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;datadesc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;datadesc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
 
+
+<div class="viewcode-block" id="NXSFile.labels">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.labels">[docs]</a>
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span> <span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; returns a list of channels with description</span>
@@ -329,9 +355,12 @@
 <span class="sd">        :rtype: :obj:`list` &lt;:obj: `str` &gt;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NXSFile.create_file_structure"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_file_structure">[docs]</a>    <span class="k">def</span> <span class="nf">create_file_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.create_file_structure">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_file_structure">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_file_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create nexus structure</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">si</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span>
@@ -366,7 +395,10 @@
         <span class="k">if</span> <span class="n">xmls</span><span class="p">:</span>
             <span class="n">nexus</span><span class="o">.</span><span class="n">create_from_string</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">xmls</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NXSFile.write_init_snapshot"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_init_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">write_init_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.write_init_snapshot">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_init_snapshot">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_init_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write init data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">si</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span>
@@ -396,7 +428,10 @@
                 <span class="k">continue</span>
             <span class="k">break</span></div>
 
-<div class="viewcode-block" id="NXSFile.prepareChannels"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.prepareChannels">[docs]</a>    <span class="k">def</span> <span class="nf">prepareChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.prepareChannels">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.prepareChannels">[docs]</a>
+    <span class="k">def</span> <span class="nf">prepareChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; prepare cursors</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cursors</span> <span class="o">=</span> <span class="p">{}</span>
@@ -452,7 +487,10 @@
                         <span class="k">raise</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_attributes</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">ch</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NXSFile.updateVDS"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.updateVDS">[docs]</a>    <span class="k">def</span> <span class="nf">updateVDS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.updateVDS">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.updateVDS">[docs]</a>
+    <span class="k">def</span> <span class="nf">updateVDS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; prepare cursors</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">si</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scan</span><span class="o">.</span><span class="n">info</span>
@@ -476,7 +514,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="s2">&quot;NXSFile::prepareChannels() - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="NXSFile.add_attributes"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.add_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">add_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.add_attributes">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.add_attributes">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; add dataset attribute</span>
 
 <span class="sd">        :param dataset: h5cpp dataset</span>
@@ -507,7 +548,10 @@
                         <span class="s2">&quot;- </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
                         <span class="o">%</span> <span class="p">(</span><span class="n">am</span><span class="p">,</span> <span class="n">nanm</span><span class="p">,</span> <span class="n">dtp</span><span class="p">,</span> <span class="n">avl</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="NXSFile.write_scan_points"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_scan_points">[docs]</a>    <span class="k">def</span> <span class="nf">write_scan_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.write_scan_points">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_scan_points">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_scan_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write step data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
@@ -578,7 +622,10 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">EndOfStream</span><span class="p">(</span><span class="s2">&quot;No active channels&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NXSFile.write_final_snapshot"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_final_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">write_final_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.write_final_snapshot">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_final_snapshot">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_final_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write final data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
@@ -666,7 +713,10 @@
                 <span class="n">root</span><span class="p">,</span> <span class="n">nxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">desc</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NXSFile.create_field"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_field">[docs]</a>    <span class="k">def</span> <span class="nf">create_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
+
+<div class="viewcode-block" id="NXSFile.create_field">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_field">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
                      <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
 
@@ -708,7 +758,10 @@
             <span class="n">field</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">field</span></div>
 
-<div class="viewcode-block" id="NXSFile.create_groupfield"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_groupfield">[docs]</a>    <span class="k">def</span> <span class="nf">create_groupfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
+
+<div class="viewcode-block" id="NXSFile.create_groupfield">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_groupfield">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_groupfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
                           <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
 
@@ -750,7 +803,10 @@
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dataset</span></div>
 
-<div class="viewcode-block" id="NXSFile.add_vmap"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.add_vmap">[docs]</a>    <span class="k">def</span> <span class="nf">add_vmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vfl</span><span class="p">,</span> <span class="n">vmap</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.add_vmap">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.add_vmap">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_vmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vfl</span><span class="p">,</span> <span class="n">vmap</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
 
 <span class="sd">        :param n: group name</span>
@@ -791,7 +847,10 @@
         <span class="n">vfl</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">h5cpp</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">VirtualDataMap</span><span class="p">(</span>
             <span class="n">h5_lview</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname</span><span class="p">),</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">h5_eview</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="NXSFile.generate_vmaps"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.generate_vmaps">[docs]</a>    <span class="k">def</span> <span class="nf">generate_vmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">frame_per_acquisition</span><span class="p">,</span>
+
+<div class="viewcode-block" id="NXSFile.generate_vmaps">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.generate_vmaps">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_vmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">frame_per_acquisition</span><span class="p">,</span>
                        <span class="n">file_offset</span><span class="p">,</span> <span class="n">file_format</span><span class="p">,</span> <span class="n">file_pattern</span><span class="p">,</span>
                        <span class="n">data_path</span><span class="p">,</span> <span class="n">frame_per_file</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; generate virtual map list</span>
@@ -865,7 +924,10 @@
             <span class="c1"># print(&quot;VMAP&quot;, vmap)</span>
         <span class="k">return</span> <span class="n">vmaps</span></div>
 
-<div class="viewcode-block" id="NXSFile.create_vds"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_vds">[docs]</a>    <span class="k">def</span> <span class="nf">create_vds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.create_vds">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_vds">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_vds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
 
 <span class="sd">        :param n: group name</span>
@@ -897,7 +959,10 @@
 
         <span class="k">return</span> <span class="n">vf</span></div>
 
-<div class="viewcode-block" id="NXSFile.create_groupvds"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_groupvds">[docs]</a>    <span class="k">def</span> <span class="nf">create_groupvds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.create_groupvds">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.create_groupvds">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_groupvds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">lnxpath</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; create field</span>
 
 <span class="sd">        :param root: root object</span>
@@ -932,7 +997,10 @@
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_vds</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">vmaps</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dataset</span></div>
 
-<div class="viewcode-block" id="NXSFile.write_attr"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_attr">[docs]</a>    <span class="k">def</span> <span class="nf">write_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">am</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.write_attr">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_attr">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">am</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write attribute</span>
 
 <span class="sd">        :param am: attribute manager</span>
@@ -1016,10 +1084,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s2">&quot;NXSFile::write_attr() - </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
                 <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">am</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">PTH</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)],</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
+
             <span class="c1"># print(&quot;WW&quot;, am, name, dtype, value, item)</span>
             <span class="c1"># print(at, dir(at))</span>
 
-<div class="viewcode-block" id="NXSFile.write_snapshot_item"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_snapshot_item">[docs]</a>    <span class="k">def</span> <span class="nf">write_snapshot_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">default_nexus_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NXSFile.write_snapshot_item">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.write_snapshot_item">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_snapshot_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">default_nexus_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; write snapshot item</span>
 
 <span class="sd">        :param root: nexus root group</span>
@@ -1076,7 +1147,10 @@
                     <span class="k">raise</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_attributes</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NXSFile.close"><a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NXSFile.close">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.close">[docs]</a>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; close file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
@@ -1085,7 +1159,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cursors</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__nxfields</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__lbnames</span> <span class="o">=</span> <span class="p">{}</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lbnames</span> <span class="o">=</span> <span class="p">{}</span></div>
+</div>
+
 </pre></div>
 
     </div>
@@ -1102,7 +1178,7 @@
         &copy; Copyright 2026 DESY, Jan Kotanski &lt;jkotan@mail.desy.de&gt;
 
 GNU GENERAL PUBLIC LICENSE, version 3.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.1.3.<br/>
     </p>
   </div>
 </footer>
