@@ -23,7 +23,8 @@
 import os
 import sys
 from setuptools import setup
-from distutils.core import Command
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 
 try:
     from sphinx.setup_command import BuildDoc
@@ -33,12 +34,17 @@ except Exception:
 
 #: package name
 NXS = "nxsblisswriter"
-#: nxs imported package
-INXS = __import__(NXS)
 
-# __requires__ = 'nextdata ==%s' % INXS.__version__
 needs_pytest = set(['test']).intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if needs_pytest else []
+
+
+def get_version():
+    path = Path(__file__).parent / "nxsblisswriter" / "Release.py"
+    spec = spec_from_file_location("Release", path.as_posix())
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def read(fname):
@@ -49,31 +55,8 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-class TestCommand(Command):
 
-    """ test command class
-    """
-
-    #: user options
-    user_options = []
-
-    #: initializes options
-    def initialize_options(self):
-        pass
-
-    #: finalizes options
-    def finalize_options(self):
-        pass
-
-    #: runs command
-    def run(self):
-        import sys
-        import subprocess
-        errno = subprocess.call([sys.executable, 'test/runtest.py'])
-        raise SystemExit(errno)
-
-
-release = INXS.__version__
+release = get_version().__version__
 version = ".".join(release.split(".")[:2])
 name = "NXSBlissWriter"
 
@@ -92,7 +75,7 @@ install_requires = [
 #: metadata for distutils
 SETUPDATA = dict(
     name="nxsblisswriter",
-    version=INXS.__version__,
+    version=release,
     author="Jan Kotanski",
     author_email="jankotan@gmail.com",
     description=("Nexus BlissData Writer"),
@@ -105,13 +88,12 @@ SETUPDATA = dict(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Physics',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
+        'Programming Language :: Python :: 3.15',
     ],
     install_requires=install_requires,
     entry_points={
