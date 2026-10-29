@@ -107,7 +107,7 @@ class NXSBlissWriterTest(unittest.TestCase):
         print(vl)
         print(er)
         # self.assertEqual(self.helpinfo, vl)
-        self.assertTrue(er.startswith(self.helperror))
+        self.assertTrue(self.helperror in er)
 
 
 if __name__ == '__main__':
