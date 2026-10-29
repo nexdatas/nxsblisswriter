@@ -1,3 +1,9 @@
+2026-10-29 Jan Kotanski <jankotan@gmail.com>
+	* add pyproject.toml file (#87)
+	* add documentation versions (#87)
+	* add first tests (#87)
+	* tagged as v0.15.0
+
 2026-10-08 Jan Kotanski <jankotan@gmail.com>
 	* add asapo stream to vds plugins (#82)
 	* add VDSPlugins property (#84)
