@@ -264,7 +264,7 @@ html_context = {
         "v0.15.0",
         "v0.14.0",
     ]
-
+}
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 # html_additional_pages = {}
