@@ -31,7 +31,7 @@ NeXuS BlissData Writer Server is a Tango Server  which
 allows to write NeXus file from (meta)data stored in BlissData
 by NXSDataWriter tango server
 
-Tango Server API: https://nexdatas.github.io/nxsblisswriter/doc_html
+Tango Server API: https://nexdatas.github.io/nxsblisswriter/stable/doc_html
 
 | Source code: https://github.com/nexdatas/nxsblisswriter/
 | Web page: https://nexdatas.github.io/nxsblisswriter/
