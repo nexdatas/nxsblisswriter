@@ -39,7 +39,7 @@ class NXSWriterService:
                  "instrument:NXinstrument/collection",
                  point_sleep_time=0.01,
                  vmaps_shape_plugins=None, vds_plugins=None,
-                 server=None):
+                 server=None, datastore=None):
         """ constructor
 
         :param redis_url: blissdata redis url
@@ -58,6 +58,11 @@ class NXSWriterService:
         :type vds_plugins: :obj:`list` <:obj:`str`>
         :param server: NXSConfigServer instance
         :type server: :class:`tango.LatestDeviceImpl`
+        :param datastore: blissdata datastore instance. When provided it is
+                          used instead of creating one from ``redis_url``.
+                          It allows injecting a mocked blissdata datastore
+                          in tests.
+        :type datastore: :class:`blissdata.redis_engine.store.DataStore`
         """
         #: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set
         self._streams = StreamSet(weakref.ref(server) if server else None)
@@ -78,7 +83,8 @@ class NXSWriterService:
         #: (:obj:`list` <:obj:`str`>) vds plugins
         self.__vds_plugins = vds_plugins or ["lima", "asapo_stream"]
         #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
-        self.__datastore = DataStore(redis_url)
+        self.__datastore = datastore \
+            if datastore is not None else DataStore(redis_url)
         #: (:obj:`list`<:obj:`str`>) error list
         self.__errors = []
         #: (:class:`threading.Lock`) threading lock

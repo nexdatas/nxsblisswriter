@@ -24,6 +24,8 @@ import sys
 import unittest
 
 import nxsblisswriter_test
+import nxsfile_test
+import nxswriterservice_test
 
 try:
     try:
@@ -70,6 +72,16 @@ def main():
     suite.addTests(
           unittest.defaultTestLoader.loadTestsFromModule(
               nxsblisswriter_test)
+    )
+
+    suite.addTests(
+          unittest.defaultTestLoader.loadTestsFromModule(
+              nxsfile_test)
+    )
+
+    suite.addTests(
+          unittest.defaultTestLoader.loadTestsFromModule(
+              nxswriterservice_test)
     )
 
     # test runner
