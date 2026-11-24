@@ -5,10 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>nxsblisswriter package &#8212; nxsblisswriter 0.15.0 documentation</title>
+    <title>nxsblisswriter package &#8212; nxsblisswriter 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=4468db6d" />
-    <script src="_static/documentation_options.js?v=ef97403f"></script>
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -36,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           nxsblisswriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.15</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.16</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -89,6 +89,7 @@
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.create_vds"><code class="docutils literal notranslate"><span class="pre">NXSFile.create_vds()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.generate_vmaps"><code class="docutils literal notranslate"><span class="pre">NXSFile.generate_vmaps()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.labels"><code class="docutils literal notranslate"><span class="pre">NXSFile.labels</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.open_file_structure"><code class="docutils literal notranslate"><span class="pre">NXSFile.open_file_structure()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.prepareChannels"><code class="docutils literal notranslate"><span class="pre">NXSFile.prepareChannels()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.updateVDS"><code class="docutils literal notranslate"><span class="pre">NXSFile.updateVDS()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.write_attr"><code class="docutils literal notranslate"><span class="pre">NXSFile.write_attr()</span></code></a></li>
@@ -200,6 +201,7 @@
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.create_vds"><code class="docutils literal notranslate"><span class="pre">NXSFile.create_vds()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.generate_vmaps"><code class="docutils literal notranslate"><span class="pre">NXSFile.generate_vmaps()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.labels"><code class="docutils literal notranslate"><span class="pre">NXSFile.labels</span></code></a></li>
+<li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.open_file_structure"><code class="docutils literal notranslate"><span class="pre">NXSFile.open_file_structure()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.prepareChannels"><code class="docutils literal notranslate"><span class="pre">NXSFile.prepareChannels()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.updateVDS"><code class="docutils literal notranslate"><span class="pre">NXSFile.updateVDS()</span></code></a></li>
 <li><a class="reference internal" href="#nxsblisswriter.NXSFile.NXSFile.write_attr"><code class="docutils literal notranslate"><span class="pre">NXSFile.write_attr()</span></code></a></li>
@@ -267,6 +269,7 @@
       <li><a class="reference external" href="index/../../latest/index.html">v:latest</a></li>
       <li><a class="reference external" href="index/../../stable/index.html">v:stable</a></li>
       
+      <li><a class="reference external" href="index/../../v0.16.0/index.html">v0.16.0</a></li>
       <li><a class="reference external" href="index/../../v0.15.0/index.html">v0.15.0</a></li>
       <li><a class="reference external" href="index/../../v0.14.0/index.html">v0.14.0</a></li>
       
@@ -496,6 +499,15 @@
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;:obj: <cite>str</cite> &gt;</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nxsblisswriter.NXSFile.NXSFile.open_file_structure">
+<span class="sig-name descname"><span class="pre">open_file_structure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSFile.html#NXSFile.open_file_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSFile.NXSFile.open_file_structure" title="Link to this definition">¶</a></dt>
+<dd><p>open an existing nexus file in append mode</p>
+<p>It ensures that the file root exists so that writing the snapshot
+and the scan points does not fail with
+<code class="docutils literal notranslate"><span class="pre">'NoneType'</span> <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'root'</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -792,7 +804,7 @@ of the default behaviour does not fullfill the needs.</p>
 <p>Provides the access to a database with NDTS configuration files</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nxsblisswriter.NXSWriterService.NXSWriterService">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nxsblisswriter.NXSWriterService.</span></span><span class="sig-name descname"><span class="pre">NXSWriterService</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redis_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_scan_timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_nexus_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/scan{serialno}:NXentry/instrument:NXinstrument/collection'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_sleep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaps_shape_plugins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vds_plugins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSWriterService.html#NXSWriterService"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSWriterService.NXSWriterService" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nxsblisswriter.NXSWriterService.</span></span><span class="sig-name descname"><span class="pre">NXSWriterService</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redis_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_scan_timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_nexus_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/scan{serialno}:NXentry/instrument:NXinstrument/collection'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_sleep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaps_shape_plugins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vds_plugins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datastore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nxsblisswriter/NXSWriterService.html#NXSWriterService"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nxsblisswriter.NXSWriterService.NXSWriterService" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>constructor</p>
 <dl class="field-list simple">
@@ -806,6 +818,10 @@ of the default behaviour does not fullfill the needs.</p>
 <li><p><strong>vmaps_shape_plugins</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>&gt;) – vmaps_shape plugins</p></li>
 <li><p><strong>vds_plugins</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> &lt;<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>&gt;) – vds plugins</p></li>
 <li><p><strong>server</strong> (<a class="reference external" href="https://tango-controls.readthedocs.io/projects/pytango/en/stable/api/server_api/device.html#tango.LatestDeviceImpl" title="(in PyTango v10.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tango.LatestDeviceImpl</span></code></a>) – NXSConfigServer instance</p></li>
+<li><p><strong>datastore</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">blissdata.redis_engine.store.DataStore</span></code>) – blissdata datastore instance. When provided it is
+used instead of creating one from <code class="docutils literal notranslate"><span class="pre">redis_url</span></code>.
+It allows injecting a mocked blissdata datastore
+in tests.</p></li>
 </ul>
 </dd>
 </dl>

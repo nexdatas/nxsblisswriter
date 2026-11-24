@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nxsblisswriter.NXSFile &#8212; nxsblisswriter 0.15.0 documentation</title>
+    <title>nxsblisswriter.NXSFile &#8212; nxsblisswriter 0.16.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css?v=4468db6d" />
-    <script src="../../_static/documentation_options.js?v=ef97403f"></script>
+    <script src="../../_static/documentation_options.js?v=7de89ed4"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -34,7 +34,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           nxsblisswriter</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.15</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.16</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -109,6 +109,7 @@
       <li><a class="reference external" href="../../index/../../latest/index.html">v:latest</a></li>
       <li><a class="reference external" href="../../index/../../stable/index.html">v:stable</a></li>
       
+      <li><a class="reference external" href="../../index/../../v0.16.0/index.html">v0.16.0</a></li>
       <li><a class="reference external" href="../../index/../../v0.15.0/index.html">v0.15.0</a></li>
       <li><a class="reference external" href="../../index/../../v0.14.0/index.html">v0.14.0</a></li>
       
@@ -154,8 +155,12 @@
 
 <span class="c1"># from blissdata.redis_engine.store import DataStore</span>
 <span class="c1"># from blissdata.redis_engine.scan import ScanState</span>
-<span class="kn">from</span> <span class="nn">blissdata.redis_engine.exceptions</span> <span class="kn">import</span> <span class="n">EndOfStream</span>
-<span class="c1"># from blissdata.redis_engine.exceptions import NoScanAvailable</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># blissdata &gt;= 2 (blissdata.redis_engine.exceptions is removed in 3)</span>
+    <span class="kn">from</span> <span class="nn">blissdata.exceptions</span> <span class="kn">import</span> <span class="n">EndOfStream</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">blissdata.redis_engine.exceptions</span> <span class="kn">import</span> <span class="n">EndOfStream</span>
+<span class="c1"># from blissdata.exceptions import NoScanAvailable</span>
 
 
 <span class="n">ALLOWED_NXS_SURFIXES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;.nxs&quot;</span><span class="p">,</span> <span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;.nx&quot;</span><span class="p">}</span>
@@ -282,9 +287,12 @@
                         <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span> <span class="n">serialno</span><span class="o">=</span><span class="n">serialno</span><span class="p">,</span> <span class="n">entryname</span><span class="o">=</span><span class="n">entryname</span><span class="p">),</span>
                     <span class="n">vmaps_shape_plugins</span><span class="p">,</span> <span class="n">vds_plugins</span>
                     <span class="p">)</span>
-    <span class="c1"># ?? append mode</span>
+    <span class="c1"># append mode: open the existing file so that its root is available,</span>
+    <span class="c1"># otherwise create a new file structure</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fpath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="n">nxsfl</span><span class="o">.</span><span class="n">create_file_structure</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nxsfl</span><span class="o">.</span><span class="n">open_file_structure</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">nxsfl</span></div>
 
 
@@ -394,6 +402,20 @@
         <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">xmls</span><span class="p">:</span>
             <span class="n">nexus</span><span class="o">.</span><span class="n">create_from_string</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">xmls</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NXSFile.open_file_structure">
+<a class="viewcode-back" href="../../nxsblisswriter.html#nxsblisswriter.NXSFile.NXSFile.open_file_structure">[docs]</a>
+    <span class="k">def</span> <span class="nf">open_file_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; open an existing nexus file in append mode</span>
+
+<span class="sd">        It ensures that the file root exists so that writing the snapshot</span>
+<span class="sd">        and the scan points does not fail with</span>
+<span class="sd">        ``&#39;NoneType&#39; object has no attribute &#39;root&#39;``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fpath</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mfile</span> <span class="o">=</span> <span class="n">nexus</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span>
+            <span class="n">filename</span><span class="p">,</span> <span class="n">h5cpp</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">AccessFlags</span><span class="o">.</span><span class="n">READWRITE</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="NXSFile.write_init_snapshot">
