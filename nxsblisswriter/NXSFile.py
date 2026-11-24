@@ -159,9 +159,12 @@ def create_nexus_file(scan,
                         number=number, serialno=serialno, entryname=entryname),
                     vmaps_shape_plugins, vds_plugins
                     )
-    # ?? append mode
+    # append mode: open the existing file so that its root is available,
+    # otherwise create a new file structure
     if not fpath.exists():
         nxsfl.create_file_structure()
+    else:
+        nxsfl.open_file_structure()
     return nxsfl
 
 
@@ -260,6 +263,17 @@ class NXSFile:
         root = self.__mfile.root()
         if xmls:
             nexus.create_from_string(root, xmls)
+
+    def open_file_structure(self):
+        """ open an existing nexus file in append mode
+
+        It ensures that the file root exists so that writing the snapshot
+        and the scan points does not fail with
+        ``'NoneType' object has no attribute 'root'``.
+        """
+        filename = str(self.__fpath.absolute())
+        self.__mfile = nexus.open_file(
+            filename, h5cpp.file.AccessFlags.READWRITE)
 
     def write_init_snapshot(self):
         """ write init data
