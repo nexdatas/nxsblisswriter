@@ -31,6 +31,7 @@ import numpy as np
 from nxsblisswriter.NXSFile import (
     first,
     NXSFile,
+    create_nexus_file,
     ALLOWED_NXS_SURFIXES,
     PTH,
 )
@@ -46,9 +47,12 @@ class FakeScan(object):
 
     # constructor
     # \param info scan info dictionary
-    def __init__(self, info):
+    # \param number scan number
+    def __init__(self, info, number=1):
         #: (:obj:`dict`) scan info
         self.info = info
+        #: (:obj:`int`) scan number
+        self.number = number
         #: (:obj:`dict`) scan streams
         self.streams = {}
 
@@ -196,6 +200,35 @@ class NXSFileTest(unittest.TestCase):
         finally:
             if fpath.exists():
                 os.remove(fpath)
+
+    # append mode test - regression test for issue #77
+    # \brief create_nexus_file opens an existing file so that root exists
+    def test_create_nexus_file_append_existing(self):
+        fun = sys._getframe().f_code.co_name
+        print("Run: %s.%s() " % (self.__class__.__name__, fun))
+
+        tdir = tempfile.mkdtemp()
+        fpath = pathlib.Path(tdir) / "scan.nxs"
+        scan = FakeScan({"filename": str(fpath), "snapshot": {}})
+        try:
+            # the first call creates the file structure
+            nxfl1 = create_nexus_file(scan, self.__streams)
+            self.assertTrue(nxfl1._NXSFile__mfile is not None)
+            nxfl1.close()
+            self.assertTrue(fpath.exists())
+
+            # the second call must open the already existing file so that
+            # its root is available - without the fix __mfile stayed None
+            # and write_init_snapshot() raised
+            # "'NoneType' object has no attribute 'root'"
+            nxfl2 = create_nexus_file(scan, self.__streams)
+            self.assertTrue(nxfl2._NXSFile__mfile is not None)
+            nxfl2.write_init_snapshot()
+            nxfl2.close()
+        finally:
+            if fpath.exists():
+                os.remove(fpath)
+            os.rmdir(tdir)
 
 
 if __name__ == '__main__':
