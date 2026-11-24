@@ -40,6 +40,10 @@ except ImportError as e:
     print("tango is not available: %s" % e)
 
 
+if PYTANGO_AVAILABLE:
+    import NXSBlissWriter_test
+
+
 try:
     __import__("pninexus.h5cpp")
     # if module pni avalable
@@ -83,6 +87,12 @@ def main():
           unittest.defaultTestLoader.loadTestsFromModule(
               nxswriterservice_test)
     )
+
+    if PYTANGO_AVAILABLE:
+        suite.addTests(
+              unittest.defaultTestLoader.loadTestsFromModule(
+                  NXSBlissWriter_test)
+        )
 
     # test runner
     runner = unittest.TextTestRunner()

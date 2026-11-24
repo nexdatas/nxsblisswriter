@@ -82,9 +82,13 @@ class NXSWriterService:
         self.__vmaps_shape_plugins = vmaps_shape_plugins or []
         #: (:obj:`list` <:obj:`str`>) vds plugins
         self.__vds_plugins = vds_plugins or ["lima", "asapo_stream"]
-        #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
-        self.__datastore = datastore \
-            if datastore is not None else DataStore(redis_url)
+        #: (:obj:`str`) blissdata redis url
+        self.__redis_url = redis_url
+        #: (:class:`blissdata.redis_engine.store.DataStore`) datastore.
+        #  When not injected it is created lazily on start() so that the
+        #  service (and the Tango device embedding it) can be built without
+        #  a live redis connection.
+        self.__datastore = datastore
         #: (:obj:`list`<:obj:`str`>) error list
         self.__errors = []
         #: (:class:`threading.Lock`) threading lock
@@ -99,6 +103,16 @@ class NXSWriterService:
         self.__error = False
         timestamp = None
         self.__errors = []
+
+        try:
+            if self.__datastore is None:
+                self.__datastore = DataStore(self.__redis_url)
+        except Exception as e:
+            self.__error = True
+            with self.__error_lock:
+                self.__errors.append(str(e))
+            self.__running = False
+            return
 
         while self.__running:
             try:
@@ -156,7 +170,7 @@ class NXSWriterService:
         """ stop writer service
         """
         self.__running = False
-        self.joint_scans(stop=True)
+        self.join_scans(stop=True)
 
     def errors(self):
         """ list of errors
