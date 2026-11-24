@@ -24,6 +24,8 @@ import sys
 import unittest
 
 import nxsblisswriter_test
+import nxsfile_test
+import nxswriterservice_test
 
 try:
     try:
@@ -36,6 +38,10 @@ try:
 except ImportError as e:
     PYTANGO_AVAILABLE = False
     print("tango is not available: %s" % e)
+
+
+if PYTANGO_AVAILABLE:
+    import NXSBlissWriter_test
 
 
 try:
@@ -71,6 +77,22 @@ def main():
           unittest.defaultTestLoader.loadTestsFromModule(
               nxsblisswriter_test)
     )
+
+    suite.addTests(
+          unittest.defaultTestLoader.loadTestsFromModule(
+              nxsfile_test)
+    )
+
+    suite.addTests(
+          unittest.defaultTestLoader.loadTestsFromModule(
+              nxswriterservice_test)
+    )
+
+    if PYTANGO_AVAILABLE:
+        suite.addTests(
+              unittest.defaultTestLoader.loadTestsFromModule(
+                  NXSBlissWriter_test)
+        )
 
     # test runner
     runner = unittest.TextTestRunner()

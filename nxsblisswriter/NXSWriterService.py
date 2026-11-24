@@ -25,8 +25,13 @@ import threading
 
 from blissdata.redis_engine.store import DataStore
 from blissdata.redis_engine.scan import ScanState
-from blissdata.redis_engine.exceptions import EndOfStream
-from blissdata.redis_engine.exceptions import NoScanAvailable
+try:
+    # blissdata >= 2 (blissdata.redis_engine.exceptions is removed in 3)
+    from blissdata.exceptions import EndOfStream
+    from blissdata.exceptions import NoScanAvailable
+except ImportError:
+    from blissdata.redis_engine.exceptions import EndOfStream
+    from blissdata.redis_engine.exceptions import NoScanAvailable
 
 from .NXSFile import create_nexus_file
 from .StreamSet import StreamSet
@@ -39,7 +44,7 @@ class NXSWriterService:
                  "instrument:NXinstrument/collection",
                  point_sleep_time=0.01,
                  vmaps_shape_plugins=None, vds_plugins=None,
-                 server=None):
+                 server=None, datastore=None):
         """ constructor
 
         :param redis_url: blissdata redis url
@@ -58,6 +63,11 @@ class NXSWriterService:
         :type vds_plugins: :obj:`list` <:obj:`str`>
         :param server: NXSConfigServer instance
         :type server: :class:`tango.LatestDeviceImpl`
+        :param datastore: blissdata datastore instance. When provided it is
+                          used instead of creating one from ``redis_url``.
+                          It allows injecting a mocked blissdata datastore
+                          in tests.
+        :type datastore: :class:`blissdata.redis_engine.store.DataStore`
         """
         #: (:class:`StreamSet` or :class:`tango.LatestDeviceImpl`) stream set
         self._streams = StreamSet(weakref.ref(server) if server else None)
@@ -77,8 +87,13 @@ class NXSWriterService:
         self.__vmaps_shape_plugins = vmaps_shape_plugins or []
         #: (:obj:`list` <:obj:`str`>) vds plugins
         self.__vds_plugins = vds_plugins or ["lima", "asapo_stream"]
-        #: (:class:`blissdata.redis_engine.store.DataStore`) datastore
-        self.__datastore = DataStore(redis_url)
+        #: (:obj:`str`) blissdata redis url
+        self.__redis_url = redis_url
+        #: (:class:`blissdata.redis_engine.store.DataStore`) datastore.
+        #  When not injected it is created lazily on start() so that the
+        #  service (and the Tango device embedding it) can be built without
+        #  a live redis connection.
+        self.__datastore = datastore
         #: (:obj:`list`<:obj:`str`>) error list
         self.__errors = []
         #: (:class:`threading.Lock`) threading lock
@@ -93,6 +108,16 @@ class NXSWriterService:
         self.__error = False
         timestamp = None
         self.__errors = []
+
+        try:
+            if self.__datastore is None:
+                self.__datastore = DataStore(self.__redis_url)
+        except Exception as e:
+            self.__error = True
+            with self.__error_lock:
+                self.__errors.append(str(e))
+            self.__running = False
+            return
 
         while self.__running:
             try:
@@ -150,7 +175,7 @@ class NXSWriterService:
         """ stop writer service
         """
         self.__running = False
-        self.joint_scans(stop=True)
+        self.join_scans(stop=True)
 
     def errors(self):
         """ list of errors
