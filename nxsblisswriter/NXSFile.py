@@ -573,7 +573,8 @@ class NXSFile:
                     data_path,
                     frame_per_file)
             elif "__vmaps__" in desc:
-                vmaps = desc["__vmaps__"]
+                vmaps = self.cure_vmaps(
+                    desc["__vmaps__"], shape, self._streams)
             root = self.__mfile.root()
             # self._streams.info(
             #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))
@@ -705,6 +706,112 @@ class NXSFile:
         # self._streams.info("ADD %s %s " % (fname, path))
         vfl.add(h5cpp.property.VirtualDataMap(
             h5_lview, str(fname), h5cpp.Path(path), h5_eview))
+
+    @classmethod
+    def cure_vmaps(cls, vmaps, shape, streams=None):
+        """ fits virtual maps to the shape of the virtual dataset
+
+        Virtual maps which select points beyond the shape are removed
+        or shortened along the first dimension, e.g. for scans stopped
+        before all points were acquired.  Maps within the shape and
+        unlimited selections are not changed.
+
+        :param vmaps: virtual map list
+        :type vmaps: :obj:`list` <:obj:`dict`>
+        :param shape: shape of the virtual dataset
+        :type shape: :obj:`list` < :obj:`int` >
+        :param streams: tango-like steamset class
+        :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`
+        :returns: virtual map list
+        :rtype: :obj:`list` <:obj:`dict`>
+        """
+        if not shape or not vmaps:
+            return vmaps
+        unlimited = int(h5cpp.dataspace.UNLIMITED)
+        cured = []
+        for vmap in vmaps:
+            vmap = json.loads(json.dumps(vmap))
+            lview = vmap.get("view") or {}
+            sel = lview.get("selection")
+            if not sel or len(sel.get("offset") or []) != len(shape):
+                cured.append(vmap)
+                continue
+            offset = list(sel["offset"])
+            block = list(sel.get("block") or [1] * len(shape))
+            count = list(sel.get("count") or [1] * len(shape))
+            stride = list(sel.get("stride") or block)
+            if any(int(ct) >= unlimited for ct in count):
+                cured.append(vmap)
+                continue
+            if any(int(offset[d]) >= int(shape[d])
+                   for d in range(len(shape))):
+                # the map is beyond the shape
+                continue
+            ends = [offset[d] + (count[d] - 1) * stride[d] + block[d]
+                    for d in range(len(shape))]
+            if any(ends[d] > shape[d] for d in range(1, len(shape))):
+                if streams:
+                    streams.warn(
+                        "NXSFile::cure_vmaps() - %s:%s does not fit %s"
+                        % (vmap.get("filename"), vmap.get("path"), shape))
+                continue
+            if ends[0] <= shape[0]:
+                cured.append(vmap)
+                continue
+            # shorten the map along the first dimension
+            available = shape[0] - offset[0]
+            if count[0] == 1:
+                old = block[0]
+                block[0] = available
+            else:
+                old = count[0] * block[0]
+                count[0] = max(1, -(-(available - block[0]) // stride[0]) + 1)
+                while count[0] > 1 and \
+                        offset[0] + (count[0] - 1) * stride[0] + block[0] \
+                        > shape[0]:
+                    count[0] -= 1
+                if offset[0] + (count[0] - 1) * stride[0] + block[0] \
+                        > shape[0]:
+                    block[0] = available
+            new = count[0] * block[0]
+            sel.update({"offset": offset, "block": block, "count": count,
+                        "stride": stride})
+            cls.__shorten_source(vmap, old, new)
+            cured.append(vmap)
+        return cured
+
+    @classmethod
+    def __shorten_source(cls, vmap, old, new):
+        """ selects the first points of the source of a shortened map
+
+        :param vmap: virtual map
+        :type vmap: :obj:`dict`
+        :param old: number of points along the first dimension
+        :type old: :obj:`int`
+        :param new: new number of points along the first dimension
+        :type new: :obj:`int`
+        """
+        if new >= old:
+            return
+        eview = vmap.setdefault("sourceview", {})
+        sds = eview.get("dataspace") or {}
+        sshape = list(sds.get("shape") or [])
+        sel = eview.get("selection")
+        if sel:
+            block = list(sel.get("block") or [1] * len(sshape))
+            count = list(sel.get("count") or [1] * len(sshape))
+            if count and count[0] > 1 and block[0] == 1:
+                count[0] = new
+            elif block:
+                block[0] = new // max(1, count[0]) or 1
+            sel["block"] = block
+            sel["count"] = count
+        elif sshape:
+            block = list(sshape)
+            block[0] = new
+            eview["selection"] = {
+                "offset": [0] * len(sshape), "block": block,
+                "count": [1] * len(sshape), "stride": [1] * len(sshape)}
 
     def generate_vmaps(self, shape, frame_per_acquisition,
                        file_offset, file_format, file_pattern,

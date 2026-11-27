@@ -230,6 +230,104 @@ class NXSFileTest(unittest.TestCase):
         finally:
             shutil.rmtree(tmpdir)
 
+    # cure vmaps test
+    # \brief It tests fitting virtual maps to the vds shape (#65)
+    def test_cure_vmaps(self):
+        fun = sys._getframe().f_code.co_name
+        print("Run: %s.%s() " % (self.__class__.__name__, fun))
+
+        def vm(offset, block=1, count=1, stride=1, total=5, ssel=None):
+            vmap = {
+                "class": "VirtualDataMap", "filename": "f%s.h5" % offset,
+                "path": "/data",
+                "view": {"class": "View",
+                         "dataspace": {"class": "Simple",
+                                       "shape": [total, 2, 3]},
+                         "selection": {"offset": [offset, 0, 0],
+                                       "block": [block, 2, 3],
+                                       "count": [count, 1, 1],
+                                       "stride": [stride, 1, 1]}},
+                "sourceview": {"class": "View",
+                               "dataspace": {"class": "Simple",
+                                             "shape": [block * count, 2, 3]}}}
+            if ssel:
+                vmap["sourceview"]["selection"] = ssel
+            return vmap
+
+        cure = NXSFile.cure_vmaps
+        vmaps = [vm(i) for i in range(5)]
+        # matching and larger shapes are not changed
+        self.assertEqual(cure(vmaps, [5, 2, 3]), vmaps)
+        self.assertEqual(cure(vmaps, [7, 2, 3]), vmaps)
+        self.assertEqual(cure(vmaps, None), vmaps)
+        self.assertEqual(cure([], [3, 2, 3]), [])
+        # maps beyond the shape are removed
+        self.assertEqual(cure(vmaps, [3, 2, 3]), vmaps[:3])
+        # a map crossing the shape is shortened with its source
+        cured = cure([vm(0, block=4)], [3, 2, 3])
+        self.assertEqual(cured[0]["view"]["selection"]["block"], [3, 2, 3])
+        self.assertEqual(cured[0]["sourceview"]["selection"],
+                         {"offset": [0, 0, 0], "block": [3, 2, 3],
+                          "count": [1, 1, 1], "stride": [1, 1, 1]})
+        # strided maps are shortened by their counts
+        cured = cure([vm(1, count=4, stride=2, total=9,
+                         ssel={"offset": [0, 0, 0], "block": [1, 2, 3],
+                               "count": [4, 1, 1], "stride": [1, 1, 1]})],
+                     [6, 2, 3])
+        self.assertEqual(cured[0]["view"]["selection"]["count"], [3, 1, 1])
+        self.assertEqual(cured[0]["sourceview"]["selection"]["count"],
+                         [3, 1, 1])
+        # maps not fitting the frame shape are removed
+        self.assertEqual(cure([vm(0)], [5, 2, 2]), [])
+        # the given maps are not changed
+        self.assertEqual(vmaps, [vm(i) for i in range(5)])
+
+    # cured vds test
+    # \brief It tests virtual datasets of shorter scans (#65)
+    def test_cured_vds(self):
+        fun = sys._getframe().f_code.co_name
+        print("Run: %s.%s() " % (self.__class__.__name__, fun))
+        import h5py
+        from pninexus import nexus, h5cpp
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            vmaps = []
+            for i in range(4):
+                src = os.path.join(tmpdir, "src_%d.h5" % i)
+                with h5py.File(src, "w") as fl:
+                    fl["data"] = np.full((1, 2, 3), i + 1, dtype="int32")
+                vmaps.append({
+                    "class": "VirtualDataMap", "filename": src,
+                    "path": "/data",
+                    "view": {"class": "View",
+                             "dataspace": {"class": "Simple",
+                                           "shape": [4, 2, 3]},
+                             "selection": {"offset": [i, 0, 0],
+                                           "block": [1, 2, 3],
+                                           "count": [1, 1, 1],
+                                           "stride": [1, 1, 1]}},
+                    "sourceview": {"class": "View",
+                                   "dataspace": {"class": "Simple",
+                                                 "shape": [1, 2, 3]}}})
+            fpath = pathlib.Path(tmpdir) / "vds.nxs"
+            nxfl = NXSFile(FakeScan({}), fpath, self.__streams)
+            for npoints in [2, 4, 6]:
+                mfile = nexus.create_file(
+                    str(fpath), h5cpp.file.AccessFlags.TRUNCATE)
+                nxfl.create_vds(
+                    mfile.root(), "data", "int32", [npoints, 2, 3],
+                    NXSFile.cure_vmaps(vmaps, [npoints, 2, 3]))
+                mfile.close()
+                with h5py.File(str(fpath), "r") as fl:
+                    data = fl["data"]
+                    self.assertEqual(data.shape, (npoints, 2, 3))
+                    self.assertEqual(
+                        [int(data[i, 0, 0]) for i in range(npoints)],
+                        [1, 2, 3, 4, 0, 0][:npoints])
+        finally:
+            shutil.rmtree(tmpdir)
+
     # channels/labels test
     # \brief It tests the channels and labels cached properties
     def test_channels_labels(self):
