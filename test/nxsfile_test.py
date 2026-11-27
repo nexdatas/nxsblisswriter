@@ -25,6 +25,7 @@ import sys
 import time
 import pathlib
 import tempfile
+import shutil
 
 import numpy as np
 
@@ -134,6 +135,100 @@ class NXSFileTest(unittest.TestCase):
             self.assertTrue(suffix in ALLOWED_NXS_SURFIXES)
         for dtype in ["int64", "int32", "float64", "float32", "str"]:
             self.assertTrue(dtype in PTH)
+
+    # links with datasources test
+    # \brief It tests links with targets provided by datasources (#70)
+    def test_datasource_links(self):
+        fun = sys._getframe().f_code.co_name
+        print("Run: %s.%s() " % (self.__class__.__name__, fun))
+        import h5py
+
+        tmpdir = tempfile.mkdtemp()
+        fpath = pathlib.Path(tmpdir) / "links.nxs"
+        extfile = os.path.join(tmpdir, "lima_0000.h5")
+        with h5py.File(extfile, "w") as fl:
+            fl.create_dataset("entry_0000/measurement/data", data=[1, 2, 3])
+
+        xml = """<definition>
+<group type="NXentry" name="scan_00012">
+ <group type="NXinstrument" name="instrument">
+  <group type="NXdetector" name="pilatus">
+   <field name="counts" type="NX_INT32"/>
+  </group>
+ </group>
+ <group type="NXdata" name="data">
+  <link name="static" target="/scan_00012/instrument/pilatus/counts"/>
+  <link name="init_link">
+   <strategy mode="INIT"/>
+   <datasource type="TANGO" name="det_path">
+    <device name="p/det/1" member="attribute"/>
+    <record name="DetPath"/>
+   </datasource>
+  </link>
+  <link name="final_link">
+   <strategy mode="FINAL"/>
+   <datasource type="CLIENT" name="lima_file">
+    <record name="lima_file"/>
+   </datasource>
+  </link>
+  <link name="fallback" target="/scan_00012/instrument/pilatus/counts">
+   <strategy mode="INIT"/>
+   <datasource type="CLIENT" name="missing">
+    <record name="missing"/>
+   </datasource>
+  </link>
+  <link name="no_target">
+   <strategy mode="INIT"/>
+   <datasource type="CLIENT" name="missing2">
+    <record name="missing2"/>
+   </datasource>
+  </link>
+ </group>
+</group>
+</definition>"""
+        info = {
+            "filename": str(fpath),
+            "snapshot": {
+                "nxsdatawriter_xmlsettings": {"value": xml},
+                "det_path": {"value": "/NXentry/instrument/pilatus/counts",
+                             "strategy": "INIT"},
+                "lima_file": {
+                    "value": "%s://entry_0000/measurement/data" % extfile,
+                    "strategy": "FINAL"},
+            },
+        }
+        nxfl = NXSFile(
+            FakeScan(info), fpath, self.__streams,
+            "/scan_00012:NXentry/instrument:NXinstrument/collection")
+        try:
+            nxfl.create_file_structure()
+            nxfl.write_init_snapshot()
+            with h5py.File(str(fpath), "r") as fl:
+                data = fl["scan_00012/data"]
+                self.assertEqual(
+                    data.get("init_link", getlink=True).path,
+                    "/scan_00012/instrument/pilatus/counts")
+                self.assertEqual(
+                    data.get("fallback", getlink=True).path,
+                    "/scan_00012/instrument/pilatus/counts")
+                self.assertEqual(
+                    data.get("static", getlink=True).path,
+                    "/scan_00012/instrument/pilatus/counts")
+                # FINAL links are created at the end of the scan
+                self.assertTrue("final_link" not in data)
+                self.assertTrue("no_target" not in data)
+            nxfl.write_final_snapshot()
+            nxfl.close()
+            with h5py.File(str(fpath), "r") as fl:
+                lnk = fl["scan_00012/data"].get("final_link", getlink=True)
+                self.assertTrue(isinstance(lnk, h5py.ExternalLink))
+                self.assertEqual(lnk.filename, extfile)
+                self.assertEqual(lnk.path, "/entry_0000/measurement/data")
+                self.assertEqual(
+                    list(fl["scan_00012/data/final_link"][()]), [1, 2, 3])
+                self.assertTrue("no_target" not in fl["scan_00012/data"])
+        finally:
+            shutil.rmtree(tmpdir)
 
     # channels/labels test
     # \brief It tests the channels and labels cached properties
