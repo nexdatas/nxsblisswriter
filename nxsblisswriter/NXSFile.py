@@ -209,6 +209,9 @@ class NXSFile:
         self.__vds = {}
         #: (:obj:`list` <:obj:`str`>) vds plugins
         self.__vds_plugins = vds_plugins or ["lima", "asapo_stream"]
+        #: (:obj:`list` <:obj:`dict`>) links with datasources, i.e. links
+        #:     with targets provided by datasources
+        self.__dslinks = []
 
     @functools.cached_property
     def channels(self):
@@ -250,6 +253,7 @@ class NXSFile:
                 'index="2"', 'index="1"').replace('index="3"', 'index="2"')
             etroot = et.fromstring(
                 xmlc2, parser=XMLParser(collect_ids=False))
+            self.__dslinks = self.extract_datasource_links(etroot)
             etdims = etroot.findall(".//dimensions")
             for etdim in etdims:
                 dparent = etdim.getparent()
@@ -304,6 +308,7 @@ class NXSFile:
             else:
                 continue
             break
+        self.create_datasource_links(["INIT"])
 
     def prepareChannels(self):
         """ prepare cursors
@@ -516,6 +521,7 @@ class NXSFile:
             else:
                 continue
             break
+        self.create_datasource_links(["STEP", "FINAL"])
         if "datadesc" not in si:
             return
         ddesc = si["datadesc"]
@@ -567,7 +573,8 @@ class NXSFile:
                     data_path,
                     frame_per_file)
             elif "__vmaps__" in desc:
-                vmaps = desc["__vmaps__"]
+                vmaps = self.cure_vmaps(
+                    desc["__vmaps__"], shape, self._streams)
             root = self.__mfile.root()
             # self._streams.info(
             #     "CREATE GROUP %s %s %s %s" % (nxpath, key, dtype, shape))
@@ -699,6 +706,112 @@ class NXSFile:
         # self._streams.info("ADD %s %s " % (fname, path))
         vfl.add(h5cpp.property.VirtualDataMap(
             h5_lview, str(fname), h5cpp.Path(path), h5_eview))
+
+    @classmethod
+    def cure_vmaps(cls, vmaps, shape, streams=None):
+        """ fits virtual maps to the shape of the virtual dataset
+
+        Virtual maps which select points beyond the shape are removed
+        or shortened along the first dimension, e.g. for scans stopped
+        before all points were acquired.  Maps within the shape and
+        unlimited selections are not changed.
+
+        :param vmaps: virtual map list
+        :type vmaps: :obj:`list` <:obj:`dict`>
+        :param shape: shape of the virtual dataset
+        :type shape: :obj:`list` < :obj:`int` >
+        :param streams: tango-like steamset class
+        :type streams: :class:`StreamSet` or :class:`tango.LatestDeviceImpl`
+        :returns: virtual map list
+        :rtype: :obj:`list` <:obj:`dict`>
+        """
+        if not shape or not vmaps:
+            return vmaps
+        unlimited = int(h5cpp.dataspace.UNLIMITED)
+        cured = []
+        for vmap in vmaps:
+            vmap = json.loads(json.dumps(vmap))
+            lview = vmap.get("view") or {}
+            sel = lview.get("selection")
+            if not sel or len(sel.get("offset") or []) != len(shape):
+                cured.append(vmap)
+                continue
+            offset = list(sel["offset"])
+            block = list(sel.get("block") or [1] * len(shape))
+            count = list(sel.get("count") or [1] * len(shape))
+            stride = list(sel.get("stride") or block)
+            if any(int(ct) >= unlimited for ct in count):
+                cured.append(vmap)
+                continue
+            if any(int(offset[d]) >= int(shape[d])
+                   for d in range(len(shape))):
+                # the map is beyond the shape
+                continue
+            ends = [offset[d] + (count[d] - 1) * stride[d] + block[d]
+                    for d in range(len(shape))]
+            if any(ends[d] > shape[d] for d in range(1, len(shape))):
+                if streams:
+                    streams.warn(
+                        "NXSFile::cure_vmaps() - %s:%s does not fit %s"
+                        % (vmap.get("filename"), vmap.get("path"), shape))
+                continue
+            if ends[0] <= shape[0]:
+                cured.append(vmap)
+                continue
+            # shorten the map along the first dimension
+            available = shape[0] - offset[0]
+            if count[0] == 1:
+                old = block[0]
+                block[0] = available
+            else:
+                old = count[0] * block[0]
+                count[0] = max(1, -(-(available - block[0]) // stride[0]) + 1)
+                while count[0] > 1 and \
+                        offset[0] + (count[0] - 1) * stride[0] + block[0] \
+                        > shape[0]:
+                    count[0] -= 1
+                if offset[0] + (count[0] - 1) * stride[0] + block[0] \
+                        > shape[0]:
+                    block[0] = available
+            new = count[0] * block[0]
+            sel.update({"offset": offset, "block": block, "count": count,
+                        "stride": stride})
+            cls.__shorten_source(vmap, old, new)
+            cured.append(vmap)
+        return cured
+
+    @classmethod
+    def __shorten_source(cls, vmap, old, new):
+        """ selects the first points of the source of a shortened map
+
+        :param vmap: virtual map
+        :type vmap: :obj:`dict`
+        :param old: number of points along the first dimension
+        :type old: :obj:`int`
+        :param new: new number of points along the first dimension
+        :type new: :obj:`int`
+        """
+        if new >= old:
+            return
+        eview = vmap.setdefault("sourceview", {})
+        sds = eview.get("dataspace") or {}
+        sshape = list(sds.get("shape") or [])
+        sel = eview.get("selection")
+        if sel:
+            block = list(sel.get("block") or [1] * len(sshape))
+            count = list(sel.get("count") or [1] * len(sshape))
+            if count and count[0] > 1 and block[0] == 1:
+                count[0] = new
+            elif block:
+                block[0] = new // max(1, count[0]) or 1
+            sel["block"] = block
+            sel["count"] = count
+        elif sshape:
+            block = list(sshape)
+            block[0] = new
+            eview["selection"] = {
+                "offset": [0] * len(sshape), "block": block,
+                "count": [1] * len(sshape), "stride": [1] * len(sshape)}
 
     def generate_vmaps(self, shape, frame_per_acquisition,
                        file_offset, file_format, file_pattern,
@@ -927,6 +1040,157 @@ class NXSFile:
                 % (name, am, dtype, PTH[str(dtype)], str(e)))
             # print("WW", am, name, dtype, value, item)
             # print(at, dir(at))
+
+    @classmethod
+    def extract_datasource_links(cls, etroot):
+        """ removes links with datasources from the xml configuration
+
+        Targets of the links are provided by values of their datasources,
+        so they are created by :meth:`create_datasource_links`.
+
+        :param etroot: xml configuration root
+        :type etroot: :class:`lxml.etree._Element`
+        :returns: descriptions of links with datasources
+        :rtype: :obj:`list` <:obj:`dict` <:obj:`str`, :obj:`str`>>
+        """
+        dslinks = []
+        for link in list(etroot.iter("link")):
+            dsnode = link.find("datasource")
+            if dsnode is None:
+                continue
+            names = []
+            parent = link.getparent()
+            while parent is not None and parent.tag in ["group"]:
+                names.append(parent.get("name") or
+                             (parent.get("type") or "")[2:])
+                parent = parent.getparent()
+            strategy = link.find("strategy")
+            record = dsnode.find("record")
+            dsname = dsnode.get("name")
+            dslinks.append({
+                "parent": "/" + "/".join(reversed(names)),
+                "name": link.get("name"),
+                "strategy": (strategy.get("mode") if strategy is not None
+                             else None) or "INIT",
+                "datasource": dsname,
+                "record": (record.get("name") if record is not None
+                           else None) or dsname,
+                "target": link.get("target"),
+            })
+            link.getparent().remove(link)
+        return dslinks
+
+    @classmethod
+    def link_target(cls, root, target):
+        """ converts a nexus link target to an hdf5 path
+
+        Group types without names, e.g. ``NXentry``, are replaced by
+        names of the groups of the types.
+
+        :param root: nexus root group
+        :type root: :class:`pninexus.h5cpp.node.Group`
+        :param target: nexus path, e.g. ``/scan:NXentry/data``
+        :type target: :obj:`str`
+        :returns: hdf5 path
+        :rtype: :obj:`str`
+        """
+        names = []
+        group = root
+        for node in [nd for nd in str(target).split("/") if nd]:
+            name = node.split(":")[0] if ":" in node else node
+            if ":" not in node and group is not None and \
+               not group.has_group(name) and \
+               not group.has_dataset(name):
+                for gr in group.nodes:
+                    if gr.type != h5cpp.node.Type.GROUP:
+                        continue
+                    try:
+                        nxclass = gr.attributes["NX_class"].read()
+                    except Exception:
+                        continue
+                    if nxclass == node:
+                        name = gr.link.path.name
+                        break
+            names.append(name)
+            if group is not None and group.has_group(name):
+                group = group.get_group(name)
+            else:
+                group = None
+        return "/" + "/".join(names)
+
+    def datasource_value(self, dslink):
+        """ provides a value of a link datasource from the scan snapshot
+
+        :param dslink: description of a link with a datasource
+        :type dslink: :obj:`dict` <:obj:`str`, :obj:`str`>
+        :returns: target value or None
+        :rtype: :obj:`str`
+        """
+        snapshot = self.__scan.info.get("snapshot") or {}
+        for key in [dslink["datasource"], dslink["record"]]:
+            if key in snapshot:
+                items = snapshot[key]
+                if not isinstance(items, list):
+                    items = [items]
+                for item in items:
+                    value = item.get("value") \
+                        if isinstance(item, dict) else None
+                    if isinstance(value, (list, tuple)) and value:
+                        value = value[0]
+                    if isinstance(value, bytes):
+                        value = value.decode()
+                    if value is not None and str(value).strip():
+                        return str(value).strip()
+        return None
+
+    def create_datasource_links(self, strategies):
+        """ creates links with targets provided by their datasources
+
+        :param strategies: link strategies, e.g. ``["INIT"]``
+        :type strategies: :obj:`list` <:obj:`str`>
+        """
+        if not self.__dslinks or self.__mfile is None:
+            return
+        root = self.__mfile.root()
+        localfile = os.path.abspath(str(self.__fpath))
+        for dslink in self.__dslinks:
+            if dslink["strategy"] not in strategies:
+                continue
+            target = self.datasource_value(dslink) or dslink["target"]
+            if not target:
+                self._streams.warn(
+                    "NXSFile::create_datasource_links() - "
+                    "no target of %s/%s from %s" % (
+                        dslink["parent"], dslink["name"],
+                        dslink["datasource"]))
+                continue
+            try:
+                parent = root.get_group(dslink["parent"]) \
+                    if dslink["parent"] != "/" else root
+                if parent.has_group(dslink["name"]) or \
+                   parent.has_dataset(dslink["name"]):
+                    self._streams.warn(
+                        "NXSFile::create_datasource_links() - "
+                        "%s/%s exists" % (dslink["parent"], dslink["name"]))
+                    continue
+                filename, path = None, target
+                if ":/" in target:
+                    filename, path = target.split(":/", 1)
+                    path = "/" + path.lstrip("/")
+                if filename and os.path.abspath(filename) != localfile:
+                    h5cpp.node.link(target_file=filename,
+                                    target=h5cpp.Path(path),
+                                    link_base=parent,
+                                    link_path=h5cpp.Path(dslink["name"]))
+                else:
+                    h5cpp.node.link(target=h5cpp.Path(
+                                    self.link_target(root, path)),
+                                    link_base=parent,
+                                    link_path=h5cpp.Path(dslink["name"]))
+            except Exception as e:
+                self._streams.error(
+                    "NXSFile::create_datasource_links() - %s/%s -> %s: %s"
+                    % (dslink["parent"], dslink["name"], target, str(e)))
 
     def write_snapshot_item(self, root, item, default_nexus_path=None):
         """ write snapshot item

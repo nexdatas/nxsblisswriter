@@ -1,3 +1,8 @@
+2026-11-27 Jan Kotanski <jankotan@gmail.com>
+	* add support for xml links with datasources (#70)
+	* cure __vmaps__ according to the vds shape, e.g. for stopped scans (#65)
+	* tagged as v0.17.0
+
 2026-11-24 Jan Kotanski <jankotan@gmail.com>
 	* update URL for HDRI repository (#90)
 	* add tests (#91)

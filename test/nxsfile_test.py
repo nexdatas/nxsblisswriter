@@ -25,6 +25,7 @@ import sys
 import time
 import pathlib
 import tempfile
+import shutil
 
 import numpy as np
 
@@ -134,6 +135,198 @@ class NXSFileTest(unittest.TestCase):
             self.assertTrue(suffix in ALLOWED_NXS_SURFIXES)
         for dtype in ["int64", "int32", "float64", "float32", "str"]:
             self.assertTrue(dtype in PTH)
+
+    # links with datasources test
+    # \brief It tests links with targets provided by datasources (#70)
+    def test_datasource_links(self):
+        fun = sys._getframe().f_code.co_name
+        print("Run: %s.%s() " % (self.__class__.__name__, fun))
+        import h5py
+
+        tmpdir = tempfile.mkdtemp()
+        fpath = pathlib.Path(tmpdir) / "links.nxs"
+        extfile = os.path.join(tmpdir, "lima_0000.h5")
+        with h5py.File(extfile, "w") as fl:
+            fl.create_dataset("entry_0000/measurement/data", data=[1, 2, 3])
+
+        xml = """<definition>
+<group type="NXentry" name="scan_00012">
+ <group type="NXinstrument" name="instrument">
+  <group type="NXdetector" name="pilatus">
+   <field name="counts" type="NX_INT32"/>
+  </group>
+ </group>
+ <group type="NXdata" name="data">
+  <link name="static" target="/scan_00012/instrument/pilatus/counts"/>
+  <link name="init_link">
+   <strategy mode="INIT"/>
+   <datasource type="TANGO" name="det_path">
+    <device name="p/det/1" member="attribute"/>
+    <record name="DetPath"/>
+   </datasource>
+  </link>
+  <link name="final_link">
+   <strategy mode="FINAL"/>
+   <datasource type="CLIENT" name="lima_file">
+    <record name="lima_file"/>
+   </datasource>
+  </link>
+  <link name="fallback" target="/scan_00012/instrument/pilatus/counts">
+   <strategy mode="INIT"/>
+   <datasource type="CLIENT" name="missing">
+    <record name="missing"/>
+   </datasource>
+  </link>
+  <link name="no_target">
+   <strategy mode="INIT"/>
+   <datasource type="CLIENT" name="missing2">
+    <record name="missing2"/>
+   </datasource>
+  </link>
+ </group>
+</group>
+</definition>"""
+        info = {
+            "filename": str(fpath),
+            "snapshot": {
+                "nxsdatawriter_xmlsettings": {"value": xml},
+                "det_path": {"value": "/NXentry/instrument/pilatus/counts",
+                             "strategy": "INIT"},
+                "lima_file": {
+                    "value": "%s://entry_0000/measurement/data" % extfile,
+                    "strategy": "FINAL"},
+            },
+        }
+        nxfl = NXSFile(
+            FakeScan(info), fpath, self.__streams,
+            "/scan_00012:NXentry/instrument:NXinstrument/collection")
+        try:
+            nxfl.create_file_structure()
+            nxfl.write_init_snapshot()
+            with h5py.File(str(fpath), "r") as fl:
+                data = fl["scan_00012/data"]
+                self.assertEqual(
+                    data.get("init_link", getlink=True).path,
+                    "/scan_00012/instrument/pilatus/counts")
+                self.assertEqual(
+                    data.get("fallback", getlink=True).path,
+                    "/scan_00012/instrument/pilatus/counts")
+                self.assertEqual(
+                    data.get("static", getlink=True).path,
+                    "/scan_00012/instrument/pilatus/counts")
+                # FINAL links are created at the end of the scan
+                self.assertTrue("final_link" not in data)
+                self.assertTrue("no_target" not in data)
+            nxfl.write_final_snapshot()
+            nxfl.close()
+            with h5py.File(str(fpath), "r") as fl:
+                lnk = fl["scan_00012/data"].get("final_link", getlink=True)
+                self.assertTrue(isinstance(lnk, h5py.ExternalLink))
+                self.assertEqual(lnk.filename, extfile)
+                self.assertEqual(lnk.path, "/entry_0000/measurement/data")
+                self.assertEqual(
+                    list(fl["scan_00012/data/final_link"][()]), [1, 2, 3])
+                self.assertTrue("no_target" not in fl["scan_00012/data"])
+        finally:
+            shutil.rmtree(tmpdir)
+
+    # cure vmaps test
+    # \brief It tests fitting virtual maps to the vds shape (#65)
+    def test_cure_vmaps(self):
+        fun = sys._getframe().f_code.co_name
+        print("Run: %s.%s() " % (self.__class__.__name__, fun))
+
+        def vm(offset, block=1, count=1, stride=1, total=5, ssel=None):
+            vmap = {
+                "class": "VirtualDataMap", "filename": "f%s.h5" % offset,
+                "path": "/data",
+                "view": {"class": "View",
+                         "dataspace": {"class": "Simple",
+                                       "shape": [total, 2, 3]},
+                         "selection": {"offset": [offset, 0, 0],
+                                       "block": [block, 2, 3],
+                                       "count": [count, 1, 1],
+                                       "stride": [stride, 1, 1]}},
+                "sourceview": {"class": "View",
+                               "dataspace": {"class": "Simple",
+                                             "shape": [block * count, 2, 3]}}}
+            if ssel:
+                vmap["sourceview"]["selection"] = ssel
+            return vmap
+
+        cure = NXSFile.cure_vmaps
+        vmaps = [vm(i) for i in range(5)]
+        # matching and larger shapes are not changed
+        self.assertEqual(cure(vmaps, [5, 2, 3]), vmaps)
+        self.assertEqual(cure(vmaps, [7, 2, 3]), vmaps)
+        self.assertEqual(cure(vmaps, None), vmaps)
+        self.assertEqual(cure([], [3, 2, 3]), [])
+        # maps beyond the shape are removed
+        self.assertEqual(cure(vmaps, [3, 2, 3]), vmaps[:3])
+        # a map crossing the shape is shortened with its source
+        cured = cure([vm(0, block=4)], [3, 2, 3])
+        self.assertEqual(cured[0]["view"]["selection"]["block"], [3, 2, 3])
+        self.assertEqual(cured[0]["sourceview"]["selection"],
+                         {"offset": [0, 0, 0], "block": [3, 2, 3],
+                          "count": [1, 1, 1], "stride": [1, 1, 1]})
+        # strided maps are shortened by their counts
+        cured = cure([vm(1, count=4, stride=2, total=9,
+                         ssel={"offset": [0, 0, 0], "block": [1, 2, 3],
+                               "count": [4, 1, 1], "stride": [1, 1, 1]})],
+                     [6, 2, 3])
+        self.assertEqual(cured[0]["view"]["selection"]["count"], [3, 1, 1])
+        self.assertEqual(cured[0]["sourceview"]["selection"]["count"],
+                         [3, 1, 1])
+        # maps not fitting the frame shape are removed
+        self.assertEqual(cure([vm(0)], [5, 2, 2]), [])
+        # the given maps are not changed
+        self.assertEqual(vmaps, [vm(i) for i in range(5)])
+
+    # cured vds test
+    # \brief It tests virtual datasets of shorter scans (#65)
+    def test_cured_vds(self):
+        fun = sys._getframe().f_code.co_name
+        print("Run: %s.%s() " % (self.__class__.__name__, fun))
+        import h5py
+        from pninexus import nexus, h5cpp
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            vmaps = []
+            for i in range(4):
+                src = os.path.join(tmpdir, "src_%d.h5" % i)
+                with h5py.File(src, "w") as fl:
+                    fl["data"] = np.full((1, 2, 3), i + 1, dtype="int32")
+                vmaps.append({
+                    "class": "VirtualDataMap", "filename": src,
+                    "path": "/data",
+                    "view": {"class": "View",
+                             "dataspace": {"class": "Simple",
+                                           "shape": [4, 2, 3]},
+                             "selection": {"offset": [i, 0, 0],
+                                           "block": [1, 2, 3],
+                                           "count": [1, 1, 1],
+                                           "stride": [1, 1, 1]}},
+                    "sourceview": {"class": "View",
+                                   "dataspace": {"class": "Simple",
+                                                 "shape": [1, 2, 3]}}})
+            fpath = pathlib.Path(tmpdir) / "vds.nxs"
+            nxfl = NXSFile(FakeScan({}), fpath, self.__streams)
+            for npoints in [2, 4, 6]:
+                mfile = nexus.create_file(
+                    str(fpath), h5cpp.file.AccessFlags.TRUNCATE)
+                nxfl.create_vds(
+                    mfile.root(), "data", "int32", [npoints, 2, 3],
+                    NXSFile.cure_vmaps(vmaps, [npoints, 2, 3]))
+                mfile.close()
+                with h5py.File(str(fpath), "r") as fl:
+                    data = fl["data"]
+                    self.assertEqual(data.shape, (npoints, 2, 3))
+                    self.assertEqual(
+                        [int(data[i, 0, 0]) for i in range(npoints)],
+                        [1, 2, 3, 4, 0, 0][:npoints])
+        finally:
+            shutil.rmtree(tmpdir)
 
     # channels/labels test
     # \brief It tests the channels and labels cached properties

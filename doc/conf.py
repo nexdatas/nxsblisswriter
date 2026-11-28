@@ -259,8 +259,9 @@ if os.getenv("NXSCONFIGSERVER_HIDE_VERSIONS") != 'TRUE':
     html_sidebars['**'].append('versions.html')
 
 html_context = {
-    "current_version": "v0.16.0",
+    "current_version": "v0.17.0",
     "docs_versions": [
+        "v0.17.0",
         "v0.16.0",
         "v0.15.0",
         "v0.14.0",
